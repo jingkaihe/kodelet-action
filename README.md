@@ -69,7 +69,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Kodelet
-        uses: jingkaihe/kodelet-action@v1
+        uses: jingkaihe/kodelet-action@v0.1.1-alpha
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           # All other inputs are automatically populated from GitHub context
@@ -105,7 +105,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 ### Basic Usage (Minimal Configuration)
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v1
+- uses: jingkaihe/kodelet-action@v0.1.1-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # All other inputs are automatically populated from GitHub context
@@ -114,7 +114,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 ### Custom Configuration
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v1
+- uses: jingkaihe/kodelet-action@v0.1.1-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     timeout-minutes: 180  # 3 hours
@@ -125,7 +125,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 ### Manual Override (if needed)
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v1
+- uses: jingkaihe/kodelet-action@v0.1.1-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # Override any auto-detected values if needed:
@@ -142,12 +142,12 @@ You can control which version of Kodelet is installed:
 
 ```yaml
 # Use latest release (default)
-- uses: jingkaihe/kodelet-action@v1
+- uses: jingkaihe/kodelet-action@v0.1.1-alpha
   with:
     kodelet-version: latest
 
 # Pin to specific version
-- uses: jingkaihe/kodelet-action@v1
+- uses: jingkaihe/kodelet-action@v0.1.1-alpha
   with:
     kodelet-version: 0.0.33.alpha
 ```
@@ -233,7 +233,3 @@ act pull_request_review_comment --secret ANTHROPIC_API_KEY=your-key
 ## License
 
 This action is licensed under the MIT License. See [LICENSE](LICENSE) for details.
-
----
-
-**Made with ❤️ by the Kodelet team**
