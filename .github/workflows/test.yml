@@ -1,0 +1,86 @@
+name: Test Action
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  issues: write          # Comment on issues
+  pull-requests: write   # Create PRs
+  contents: write        # Push commits
+
+jobs:
+  # test-action:
+  #   runs-on: ubuntu-latest
+
+  #   strategy:
+  #     matrix:
+  #       test-scenario:
+  #         - name: "Issue Comment Test"
+  #           event-name: "issue_comment"
+  #           is-pr: "false"
+  #           issue-number: "1"
+  #           kodelet-version: "latest"
+  #         - name: "PR Comment Test"
+  #           event-name: "issue_comment"
+  #           is-pr: "true"
+  #           issue-number: "2"
+  #           pr-number: "2"
+  #           kodelet-version: "latest"
+  #         - name: "PR Review Comment Test"
+  #           event-name: "pull_request_review_comment"
+  #           is-pr: "true"
+  #           issue-number: "3"
+  #           pr-number: "3"
+  #           comment-id: "123456"
+  #           kodelet-version: "latest"
+
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+
+  #     - name: Test Action - ${{ matrix.test-scenario.name }}
+  #       uses: ./
+  #       with:
+  #         anthropic-api-key: "sk-ant-test-key"
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         commenter: "test-user"
+  #         event-name: ${{ matrix.test-scenario.event-name }}
+  #         issue-number: ${{ matrix.test-scenario.issue-number }}
+  #         comment-id: ${{ matrix.test-scenario.comment-id }}
+  #         repository: ${{ github.repository }}
+  #         is-pr: ${{ matrix.test-scenario.is-pr }}
+  #         pr-number: ${{ matrix.test-scenario.pr-number }}
+  #         timeout-minutes: "5"
+  #         log-level: "debug"
+  #         kodelet-version: ${{ matrix.test-scenario.kodelet-version }}
+  #       env:
+  #         KODELET_DRY_RUN: "true"  # Skip actual execution
+  lint-action:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate action.yml
+        run: |
+          # Check if action.yml is valid YAML
+          python3 -c "import yaml; yaml.safe_load(open('action.yml'))"
+
+      - name: Check required files
+        run: |
+          # Ensure all required files exist
+          test -f action.yml || exit 1
+          test -f README.md || exit 1
+          test -f LICENSE || exit 1
+
+      - name: Validate inputs and outputs
+        run: |
+          # Basic validation of action structure
+          grep -q "name:" action.yml || exit 1
+          grep -q "description:" action.yml || exit 1
+          grep -q "runs:" action.yml || exit 1
+          grep -q "using: 'composite'" action.yml || exit 1

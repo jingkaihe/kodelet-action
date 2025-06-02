@@ -1,0 +1,181 @@
+name: 'Kodelet Action'
+description: 'Automate software engineering tasks using Kodelet AI'
+branding:
+  icon: 'robot'
+  color: 'blue'
+
+inputs:
+  anthropic-api-key:
+    description: 'Anthropic API key for Kodelet'
+    required: true
+  github-token:
+    description: 'GitHub token for repository operations'
+    required: true
+    default: ${{ github.token }}
+  commenter:
+    description: 'Username of the person who triggered the action'
+    required: false
+    default: ${{ github.event.comment.user.login || github.event.review.user.login || github.actor }}
+  event-name:
+    description: 'GitHub event name (issue_comment, pull_request_review_comment, pull_request_review)'
+    required: false
+    default: ${{ github.event_name }}
+  issue-number:
+    description: 'Issue or PR number'
+    required: false
+    default: ${{ github.event.issue.number || github.event.pull_request.number }}
+  comment-id:
+    description: 'Comment ID (for PR comments)'
+    required: false
+    default: ${{ github.event.comment.id }}
+  repository:
+    description: 'Repository in format owner/repo'
+    required: false
+    default: ${{ github.repository }}
+  is-pr:
+    description: 'Whether this is a pull request (true/false)'
+    required: false
+    default: ${{ github.event.issue.pull_request != null || github.event_name == 'pull_request_review_comment' || github.event_name == 'pull_request_review' }}
+  pr-number:
+    description: 'Pull request number (when applicable)'
+    required: false
+    default: ${{ github.event.pull_request.number }}
+  timeout-minutes:
+    description: 'Timeout for Kodelet execution in minutes'
+    required: false
+    default: '300'
+  log-level:
+    description: 'Log level for Kodelet (debug, info, warn, error)'
+    required: false
+    default: 'info'
+  kodelet-version:
+    description: 'Kodelet version to install (e.g., 0.0.33.alpha, latest)'
+    required: false
+    default: 'latest'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Post status comment
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          // Determine the correct issue/PR number and type
+          const issueNumber = parseInt('${{ inputs.issue-number }}');
+          const isPR = '${{ inputs.is-pr }}' === 'true';
+          const workType = isPR ? 'PR comment' : 'issue';
+
+          await github.rest.issues.createComment({
+            issue_number: issueNumber,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `🤖 Kodelet is starting to work on this ${workType}...`
+          });
+
+    - name: Install Kodelet
+      shell: bash
+      env:
+        KODELET_VERSION: ${{ inputs.kodelet-version }}
+      run: |
+        # Install from the installation script with specified version
+        curl -sSL https://raw.githubusercontent.com/jingkaihe/kodelet/main/install.sh | bash
+
+    - name: Configure Git
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        COMMENTER: ${{ inputs.commenter }}
+      run: |
+        # Try to get the user's public email first
+        USER_DATA=$(gh api users/$COMMENTER 2>/dev/null || echo "{}")
+        EMAIL=$(echo "$USER_DATA" | jq -r '.email // empty')
+        USER_ID=$(echo "$USER_DATA" | jq -r '.id // empty')
+
+        if [ -z "$EMAIL" ] || [ "$EMAIL" = "null" ]; then
+          # Use GitHub's private noreply format with user ID
+          if [ -n "$USER_ID" ] && [ "$USER_ID" != "null" ]; then
+            EMAIL="${USER_ID}+${COMMENTER}@users.noreply.github.com"
+          else
+            EMAIL="${COMMENTER}@users.noreply.github.com"
+          fi
+        fi
+
+        git config --global user.name "$COMMENTER"
+        git config --global user.email "$EMAIL"
+
+    - name: Run Kodelet
+      shell: bash
+      env:
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        KODELET_LOG_LEVEL: ${{ inputs.log-level }}
+      run: |
+        # Set timeout for command execution
+        timeout_minutes="${{ inputs.timeout-minutes }}"
+        timeout_seconds=$((timeout_minutes * 60))
+
+        # Check for dry run mode (used for testing)
+        if [ "${KODELET_DRY_RUN}" = "true" ]; then
+          echo "🧪 DRY RUN MODE: Simulating Kodelet execution"
+          echo "Event: ${{ inputs.event-name }}"
+          echo "Is PR: ${{ inputs.is-pr }}"
+          echo "Issue/PR Number: ${{ inputs.issue-number }}"
+          echo "Commenter: ${{ inputs.commenter }}"
+          echo "Repository: ${{ inputs.repository }}"
+          echo "Timeout: ${timeout_minutes} minutes"
+          echo "Log Level: ${{ inputs.log-level }}"
+          exit 0
+        fi
+
+        # Determine command based on event type and PR status
+        if [ "${{ inputs.event-name }}" = "pull_request_review_comment" ] || [ "${{ inputs.event-name }}" = "pull_request_review" ]; then
+          # Handle PR review comments
+          PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.pr-number }}"
+          if [ "${{ inputs.event-name }}" = "pull_request_review_comment" ] && [ -n "${{ inputs.comment-id }}" ]; then
+            COMMENT_ID="${{ inputs.comment-id }}"
+            timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --comment-id "$COMMENT_ID"
+          else
+            # PR review without specific comment ID - use latest @kodelet mention
+            timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL"
+          fi
+        elif [ "${{ inputs.is-pr }}" = "true" ]; then
+          # Handle PR comments (issue_comment on PR)
+          PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.issue-number }}"
+          if [ -n "${{ inputs.comment-id }}" ]; then
+            COMMENT_ID="${{ inputs.comment-id }}"
+            timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --comment-id "$COMMENT_ID"
+          else
+            timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL"
+          fi
+        else
+          # Handle regular issue comments
+          ISSUE_URL="https://github.com/${{ inputs.repository }}/issues/${{ inputs.issue-number }}"
+          timeout ${timeout_seconds}s kodelet resolve --issue-url "$ISSUE_URL"
+        fi
+
+    - name: Handle errors
+      uses: actions/github-script@v7
+      if: failure()
+      with:
+        github-token: ${{ inputs.github-token }}
+        script: |
+          const issueNumber = parseInt('${{ inputs.issue-number }}');
+          const isPR = '${{ inputs.is-pr }}' === 'true';
+          const workType = isPR ? 'PR comment' : 'issue';
+
+          await github.rest.issues.createComment({
+            issue_number: issueNumber,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: `❌ **Kodelet encountered an error while working on this ${workType}**
+
+          The automated workflow failed during execution. This could be due to:
+          - Complex requirements that need human intervention
+          - Environmental or dependency issues
+          - API rate limits or service unavailability
+
+          Please check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for more details.
+
+          You may want to try again later or handle this manually.`
+          });

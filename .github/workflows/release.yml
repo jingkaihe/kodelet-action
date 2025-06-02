@@ -1,0 +1,101 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag format
+        run: |
+          # Ensure tag follows semver format with support for .alpha, .beta tags
+          if [[ ! "${{ github.ref_name }}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+((-|\.)([a-zA-Z0-9]+))?$ ]]; then
+            echo "Tag ${{ github.ref_name }} does not follow semantic versioning format"
+            exit 1
+          fi
+
+      - name: Extract version info
+        id: version
+        run: |
+          VERSION=${{ github.ref_name }}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "version_number=${VERSION#v}" >> $GITHUB_OUTPUT
+          # Extract major version for moving tag
+          MAJOR_VERSION=$(echo ${VERSION} | sed 's/v\([0-9]*\).*/v\1/')
+          echo "major_version=${MAJOR_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Validate action
+        run: |
+          # Validate action.yml syntax
+          python3 -c "import yaml; yaml.safe_load(open('action.yml'))"
+
+          # Ensure all required files exist
+          test -f README.md || exit 1
+          test -f LICENSE || exit 1
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          # Generate changelog from git history since last tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 HEAD~1 2>/dev/null || echo "")
+
+          if [ -n "$PREVIOUS_TAG" ]; then
+            echo "## What's Changed" > release_notes.md
+            echo "" >> release_notes.md
+            git log --pretty=format:"- %s (%h)" ${PREVIOUS_TAG}..HEAD >> release_notes.md
+          else
+            echo "## Initial Release" > release_notes.md
+            echo "" >> release_notes.md
+            echo "First release of Kodelet Action" >> release_notes.md
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.version.outputs.version }}
+          name: ${{ steps.version.outputs.version }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.version, '-') }}
+          generate_release_notes: true
+
+      - name: Update major version tag
+        run: |
+          # Delete existing major version tag locally and remotely
+          git tag -d ${{ steps.version.outputs.major_version }} || true
+          git push origin :refs/tags/${{ steps.version.outputs.major_version }} || true
+
+          # Create new major version tag
+          git tag ${{ steps.version.outputs.major_version }}
+          git push origin ${{ steps.version.outputs.major_version }}
+
+  # test-released-action:
+  #   needs: release
+  #   runs-on: ubuntu-latest
+
+  #   steps:
+  #     - name: Test released action
+  #       uses: jingkaihe/kodelet-action@${{ github.ref_name }}
+  #       with:
+  #         anthropic-api-key: "sk-ant-test-key"
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         commenter: "release-test"
+  #         event-name: "issue_comment"
+  #         issue-number: "1"
+  #         repository: ${{ github.repository }}
+  #         is-pr: "false"
+  #         timeout-minutes: "1"
+  #       env:
+  #         KODELET_DRY_RUN: "true"
