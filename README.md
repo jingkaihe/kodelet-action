@@ -7,12 +7,12 @@ A GitHub Action that automates software engineering tasks using Kodelet AI. This
 
 ## Features
 
-🤖 **AI-Powered Engineering**: Automates software engineering tasks using advanced AI models
-📝 **Issue Resolution**: Automatically resolves GitHub issues with code changes and explanations
-🔍 **PR Reviews**: Provides intelligent code review comments and suggestions
-⚡ **Background Processing**: Runs asynchronously without blocking your development workflow
-🔄 **Multi-Event Support**: Works with issue comments, PR comments, and review comments
-🛡️ **Secure**: Uses GitHub tokens and API keys securely through GitHub Secrets
+* 🤖 **AI-Powered Engineering**: Automates software engineering tasks using advanced AI models
+* 📝 **Issue Resolution**: Automatically resolves GitHub issues with code changes and explanations
+* 🔍 **PR Reviews**: Provides intelligent code review comments and suggestions
+* ⚡ **Background Processing**: Runs asynchronously without blocking your development workflow
+* 🔄 **Multi-Event Support**: Works with issue comments, PR comments, and review comments
+* 🛡️ **Secure**: Uses GitHub tokens and API keys securely through GitHub Secrets
 
 ## Quick Start
 
