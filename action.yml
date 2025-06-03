@@ -25,9 +25,13 @@ inputs:
     required: false
     default: ${{ github.event.issue.number || github.event.pull_request.number }}
   comment-id:
-    description: 'Comment ID (for PR comments)'
+    description: 'Comment ID (for issue comments on PRs)'
     required: false
     default: ${{ github.event.comment.id }}
+  review-id:
+    description: 'Review ID (for PR review comments)'
+    required: false
+    default: ${{ github.event.review.id }}
   repository:
     description: 'Repository in format owner/repo'
     required: false
@@ -49,7 +53,7 @@ inputs:
     required: false
     default: 'info'
   kodelet-version:
-    description: 'Kodelet version to install (e.g., 0.0.33.alpha, latest)'
+    description: 'Kodelet version to install (e.g., 0.0.35.alpha, latest)'
     required: false
     default: 'latest'
 
@@ -115,39 +119,17 @@ runs:
         timeout_minutes="${{ inputs.timeout-minutes }}"
         timeout_seconds=$((timeout_minutes * 60))
 
-        # Check for dry run mode (used for testing)
-        if [ "${KODELET_DRY_RUN}" = "true" ]; then
-          echo "🧪 DRY RUN MODE: Simulating Kodelet execution"
-          echo "Event: ${{ inputs.event-name }}"
-          echo "Is PR: ${{ inputs.is-pr }}"
-          echo "Issue/PR Number: ${{ inputs.issue-number }}"
-          echo "Commenter: ${{ inputs.commenter }}"
-          echo "Repository: ${{ inputs.repository }}"
-          echo "Timeout: ${timeout_minutes} minutes"
-          echo "Log Level: ${{ inputs.log-level }}"
-          exit 0
-        fi
-
         # Determine command based on event type and PR status
         if [ "${{ inputs.event-name }}" = "pull_request_review_comment" ] || [ "${{ inputs.event-name }}" = "pull_request_review" ]; then
-          # Handle PR review comments
+          # Handle PR review comments - use review-id parameter
           PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.pr-number }}"
-          if [ "${{ inputs.event-name }}" = "pull_request_review_comment" ] && [ -n "${{ inputs.comment-id }}" ]; then
-            COMMENT_ID="${{ inputs.comment-id }}"
-            timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --comment-id "$COMMENT_ID"
-          else
-            # PR review without specific comment ID - use latest @kodelet mention
-            timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL"
-          fi
+          REVIEW_ID="${{ inputs.review-id }}"
+          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --review-id "$REVIEW_ID"
         elif [ "${{ inputs.is-pr }}" = "true" ]; then
-          # Handle PR comments (issue_comment on PR)
+          # Handle PR comments (issue_comment on PR) - use issue-comment-id parameter
           PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.issue-number }}"
-          if [ -n "${{ inputs.comment-id }}" ]; then
-            COMMENT_ID="${{ inputs.comment-id }}"
-            timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --comment-id "$COMMENT_ID"
-          else
-            timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL"
-          fi
+          COMMENT_ID="${{ inputs.comment-id }}"
+          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --issue-comment-id "$COMMENT_ID"
         else
           # Handle regular issue comments
           ISSUE_URL="https://github.com/${{ inputs.repository }}/issues/${{ inputs.issue-number }}"

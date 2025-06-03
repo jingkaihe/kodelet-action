@@ -7,12 +7,12 @@ A GitHub Action that automates software engineering tasks using Kodelet AI. This
 
 ## Features
 
-🤖 **AI-Powered Engineering**: Automates software engineering tasks using advanced AI models
-📝 **Issue Resolution**: Automatically resolves GitHub issues with code changes and explanations
-🔍 **PR Reviews**: Provides intelligent code review comments and suggestions
-⚡ **Background Processing**: Runs asynchronously without blocking your development workflow
-🔄 **Multi-Event Support**: Works with issue comments, PR comments, and review comments
-🛡️ **Secure**: Uses GitHub tokens and API keys securely through GitHub Secrets
+* 🤖 **AI-Powered Engineering**: Automates software engineering tasks using advanced AI models
+* 📝 **Issue Resolution**: Automatically resolves GitHub issues with code changes and explanations
+* 🔍 **PR Reviews**: Provides intelligent code review comments and suggestions
+* ⚡ **Background Processing**: Runs asynchronously without blocking your development workflow
+* 🔄 **Multi-Event Support**: Works with issue comments, PR comments, and review comments
+* 🛡️ **Secure**: Uses GitHub tokens and API keys securely through GitHub Secrets
 
 ## Quick Start
 
@@ -47,7 +47,7 @@ permissions:
   contents: write
 
 jobs:
-  kodelet-work:
+  background-agent:
     runs-on: ubuntu-latest
     timeout-minutes: 360
     if: |
@@ -69,7 +69,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Kodelet
-        uses: jingkaihe/kodelet-action@v0.1.1-alpha
+        uses: jingkaihe/kodelet-action@v0.1.2-alpha
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           # All other inputs are automatically populated from GitHub context
@@ -92,20 +92,21 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 | `commenter` | Username who triggered the action | ❌ | Auto-detected from event |
 | `event-name` | GitHub event name | ❌ | `${{ github.event_name }}` |
 | `issue-number` | Issue or PR number | ❌ | Auto-detected from event |
-| `comment-id` | Comment ID (for PR comments) | ❌ | Auto-detected from event |
+| `comment-id` | Comment ID (for issue comments on PRs) | ❌ | Auto-detected from event |
+| `review-id` | Review ID (for PR review comments) | ❌ | Auto-detected from event |
 | `repository` | Repository in format owner/repo | ❌ | `${{ github.repository }}` |
 | `is-pr` | Whether this is a pull request | ❌ | Auto-detected from event |
 | `pr-number` | Pull request number | ❌ | Auto-detected from event |
 | `timeout-minutes` | Timeout for execution in minutes | ❌ | `300` |
 | `log-level` | Log level (debug, info, warn, error) | ❌ | `info` |
-| `kodelet-version` | Kodelet version to install (e.g., v1.0.0, latest) | ❌ | `latest` |
+| `kodelet-version` | Kodelet version to install (e.g., v0.0.35.alpha, latest) | ❌ | `latest` |
 
 ## Usage Examples
 
 ### Basic Usage (Minimal Configuration)
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.1-alpha
+- uses: jingkaihe/kodelet-action@v0.1.2-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # All other inputs are automatically populated from GitHub context
@@ -114,18 +115,18 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 ### Custom Configuration
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.1-alpha
+- uses: jingkaihe/kodelet-action@v0.1.2-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     timeout-minutes: 180  # 3 hours
     log-level: debug
-    kodelet-version: v1.0.0  # Pin to specific version
+    kodelet-version: v0.0.35.alpha  # Pin to specific version
 ```
 
 ### Manual Override (if needed)
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.1-alpha
+- uses: jingkaihe/kodelet-action@v0.1.2-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # Override any auto-detected values if needed:
@@ -142,14 +143,14 @@ You can control which version of Kodelet is installed:
 
 ```yaml
 # Use latest release (default)
-- uses: jingkaihe/kodelet-action@v0.1.1-alpha
+- uses: jingkaihe/kodelet-action@v0.1.2-alpha
   with:
     kodelet-version: latest
 
 # Pin to specific version
-- uses: jingkaihe/kodelet-action@v0.1.1-alpha
+- uses: jingkaihe/kodelet-action@v0.1.2-alpha
   with:
-    kodelet-version: 0.0.33.alpha
+    kodelet-version: 0.0.35.alpha
 ```
 
 **Recommended approaches:**
@@ -180,9 +181,9 @@ permissions:
 | Event | Description | Kodelet Command |
 |-------|-------------|-----------------|
 | `issue_comment` | Comments on issues | `kodelet resolve --issue-url` |
-| `issue_comment` (on PR) | Comments on pull requests | `kodelet pr-respond --pr-url` |
-| `pull_request_review_comment` | Inline PR review comments | `kodelet pr-respond --pr-url --comment-id` |
-| `pull_request_review` | PR review submissions | `kodelet pr-respond --pr-url` |
+| `issue_comment` (on PR) | Comments on pull requests | `kodelet pr-respond --pr-url --issue-comment-id` |
+| `pull_request_review_comment` | Inline PR review comments | `kodelet pr-respond --pr-url --review-id` |
+| `pull_request_review` | PR review submissions | `kodelet pr-respond --pr-url --review-id` |
 
 ## Error Handling
 
@@ -199,8 +200,8 @@ Failed runs include links to workflow logs for debugging.
 
 This action follows semantic versioning:
 
-- **Latest stable**: `@v1`
-- **Specific version**: `@v1.0.0`
+- **Latest stable**: `@v0`
+- **Specific version**: `@v0.1.2-alpha`
 - **Development**: `@main` (not recommended for production)
 
 ## Development

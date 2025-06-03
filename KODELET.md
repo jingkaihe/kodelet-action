@@ -24,14 +24,14 @@ GitHub Action that automates software engineering tasks using Kodelet AI. Enable
 ## Key Components
 
 ### action.yml
-Main action with inputs: `anthropic-api-key`, `github-token`, `commenter`, `event-name`, `issue-number`, `is-pr`
+Main action with inputs: `anthropic-api-key`, `github-token`, `commenter`, `event-name`, `issue-number`, `comment-id`, `review-id`, `is-pr`
 Steps: Status comment → Install Kodelet → Configure Git → Run Kodelet → Error handling
 
 ### Event Handling
 - `issue_comment`: Comments on issues → `kodelet resolve --issue-url`
-- `issue_comment` (on PR): Comments on PRs → `kodelet pr-respond --pr-url`
-- `pull_request_review_comment`: Inline PR comments → `kodelet pr-respond --pr-url --comment-id`
-- `pull_request_review`: PR review submissions → `kodelet pr-respond --pr-url`
+- `issue_comment` (on PR): Comments on PRs → `kodelet pr-respond --pr-url --issue-comment-id`
+- `pull_request_review_comment`: Inline PR comments → `kodelet pr-respond --pr-url --review-id`
+- `pull_request_review`: PR review submissions → `kodelet pr-respond --pr-url --review-id`
 
 ## Security & Permissions
 ```yaml
@@ -45,11 +45,10 @@ permissions:
 - `ANTHROPIC_API_KEY`: Required for Kodelet AI
 - `GITHUB_TOKEN`: GitHub API access (auto-provided)
 - `KODELET_LOG_LEVEL`: Optional (debug, info, warn, error)
-- `KODELET_DRY_RUN`: Test mode flag
 
 ## Configuration
 - **Timeout**: Default 300min, max 360min
-- **Versioning**: `latest`, `v1.0.0`, `0.0.33.alpha`
+- **Versioning**: `latest`, `v0.1.2-alpha`
 
 ## Coding Conventions
 - **YAML**: Single quotes, 2-space indent, descriptive step names
@@ -60,7 +59,6 @@ permissions:
 - Semantic versioning (v1.2.3)
 - Major version tags (v1) → latest patch
 - Matrix testing for event scenarios
-- Dry run mode for safe testing
 
 ## Common Issues
 - **Timeout**: Increase `timeout-minutes`, check API limits
