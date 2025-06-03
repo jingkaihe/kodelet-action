@@ -40,7 +40,7 @@ A simple, production-ready configuration that covers the most common use cases:
 ### Optional Inputs
 - `comment-id`: Specific comment ID for PR reviews
 - `pr-number`: Pull request number
-- `timeout-minutes`: Execution timeout (default: 300)
+- `timeout-minutes`: Execution timeout (default: 15)
 - `log-level`: Logging level (default: info)
 - `kodelet-version`: Kodelet version to install (default: latest)
 

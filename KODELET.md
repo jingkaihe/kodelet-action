@@ -47,7 +47,7 @@ permissions:
 - `KODELET_LOG_LEVEL`: Optional (debug, info, warn, error)
 
 ## Configuration
-- **Timeout**: Default 300min, max 360min
+- **Timeout**: Default 15min, max 360min
 - **Versioning**: `latest`, `v0.1.2-alpha`
 
 ## Coding Conventions

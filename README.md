@@ -97,7 +97,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 | `repository` | Repository in format owner/repo | ❌ | `${{ github.repository }}` |
 | `is-pr` | Whether this is a pull request | ❌ | Auto-detected from event |
 | `pr-number` | Pull request number | ❌ | Auto-detected from event |
-| `timeout-minutes` | Timeout for execution in minutes | ❌ | `300` |
+| `timeout-minutes` | Timeout for execution in minutes | ❌ | `15` |
 | `log-level` | Log level (debug, info, warn, error) | ❌ | `info` |
 | `kodelet-version` | Kodelet version to install (e.g., v0.0.35.alpha, latest) | ❌ | `latest` |
 
