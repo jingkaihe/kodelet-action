@@ -47,7 +47,7 @@ inputs:
   timeout-minutes:
     description: 'Timeout for Kodelet execution in minutes'
     required: false
-    default: '300'
+    default: '15'
   log-level:
     description: 'Log level for Kodelet (debug, info, warn, error)'
     required: false
@@ -74,7 +74,9 @@ runs:
             issue_number: issueNumber,
             owner: context.repo.owner,
             repo: context.repo.repo,
-            body: `🤖 Kodelet is starting to work on this ${workType}...`
+            body: `🤖 Kodelet is starting to work on this ${workType}...
+
+          You can track the progress in the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).`
           });
 
     - name: Install Kodelet
