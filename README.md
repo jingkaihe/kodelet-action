@@ -49,14 +49,16 @@ permissions:
 jobs:
   background-agent:
     runs-on: ubuntu-latest
-    timeout-minutes: 360
+    timeout-minutes: 15  # 15 minutes
     if: |
       (
+        (github.event_name == 'issues' && contains(github.event.issue.body, '@kodelet')) ||
         (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@kodelet')) ||
         (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@kodelet')) ||
         (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@kodelet'))
       ) &&
       (
+        (github.event.issue.author_association == 'OWNER' || github.event.issue.author_association == 'MEMBER' || github.event.issue.author_association == 'COLLABORATOR') ||
         (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'COLLABORATOR') ||
         (github.event.review.author_association == 'OWNER' || github.event.review.author_association == 'MEMBER' || github.event.review.author_association == 'COLLABORATOR')
       )
@@ -65,11 +67,12 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
-
+      - name: Setup your dev environment
+        run: |
+          echo "YMMV"
       - name: Run Kodelet
-        uses: jingkaihe/kodelet-action@v0.1.2-alpha
+        uses: jingkaihe/kodelet-action@v0.1.4-alpha
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           # All other inputs are automatically populated from GitHub context
@@ -106,7 +109,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 ### Basic Usage (Minimal Configuration)
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.2-alpha
+- uses: jingkaihe/kodelet-action@v0.1.4-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # All other inputs are automatically populated from GitHub context
@@ -115,7 +118,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 ### Custom Configuration
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.2-alpha
+- uses: jingkaihe/kodelet-action@v0.1.4-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     timeout-minutes: 180  # 3 hours
@@ -126,7 +129,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 ### Manual Override (if needed)
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.2-alpha
+- uses: jingkaihe/kodelet-action@v0.1.4-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # Override any auto-detected values if needed:
@@ -143,12 +146,12 @@ You can control which version of Kodelet is installed:
 
 ```yaml
 # Use latest release (default)
-- uses: jingkaihe/kodelet-action@v0.1.2-alpha
+- uses: jingkaihe/kodelet-action@v0.1.4-alpha
   with:
     kodelet-version: latest
 
 # Pin to specific version
-- uses: jingkaihe/kodelet-action@v0.1.2-alpha
+- uses: jingkaihe/kodelet-action@v0.1.4-alpha
   with:
     kodelet-version: 0.0.35.alpha
 ```
@@ -201,7 +204,7 @@ Failed runs include links to workflow logs for debugging.
 This action follows semantic versioning:
 
 - **Latest stable**: `@v0`
-- **Specific version**: `@v0.1.2-alpha`
+- **Specific version**: `@v0.1.4-alpha`
 - **Development**: `@main` (not recommended for production)
 
 ## Development

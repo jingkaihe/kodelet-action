@@ -48,7 +48,7 @@ permissions:
 
 ## Configuration
 - **Timeout**: Default 15min, max 360min
-- **Versioning**: `latest`, `v0.1.2-alpha`
+- **Versioning**: `latest`, `v0.1.4-alpha`
 
 ## Coding Conventions
 - **YAML**: Single quotes, 2-space indent, descriptive step names
