@@ -64,3 +64,11 @@ jobs:
           # is-pr: false
           # pr-number: 789
           # kodelet-version: latest
+          
+          # Optional: Pass additional environment variables to Kodelet
+          # env: |
+          #   {
+          #     "DATABASE_URL": "${{ secrets.DATABASE_URL }}",
+          #     "API_BASE_URL": "https://api.example.com",
+          #     "DEBUG_MODE": "true"
+          #   }

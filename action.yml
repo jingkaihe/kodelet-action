@@ -7,7 +7,10 @@ branding:
 inputs:
   anthropic-api-key:
     description: 'Anthropic API key for Kodelet'
-    required: true
+    required: false
+  openai-api-key:
+    description: 'OpenAI API key for Kodelet'
+    required: false
   github-token:
     description: 'GitHub token for repository operations'
     required: true
@@ -56,6 +59,13 @@ inputs:
     description: 'Kodelet version to install (e.g., 0.0.35.alpha, latest)'
     required: false
     default: 'latest'
+  env:
+    description: 'Additional environment variables for Kodelet execution (JSON object as string, e.g., {"VAR1": "value1", "VAR2": "value2"})'
+    required: false
+    default: '{}'
+  kodelet-config:
+    description: 'Kodelet configuration content in YAML format. If provided, will be written to ~/.kodelet/config.yaml. Defaults to ./kodelet-config.yaml if it exists and no config is provided'
+    required: false
 
 runs:
   using: 'composite'
@@ -114,12 +124,36 @@ runs:
       shell: bash
       env:
         ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        OPENAI_API_KEY: ${{ inputs.openai-api-key }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
         KODELET_LOG_LEVEL: ${{ inputs.log-level }}
       run: |
         # Set timeout for command execution
         timeout_minutes="${{ inputs.timeout-minutes }}"
         timeout_seconds=$((timeout_minutes * 60))
+        
+        # Parse and export additional environment variables
+        additional_env='${{ inputs.env }}'
+        if [ "$additional_env" != "{}" ] && [ -n "$additional_env" ]; then
+          echo "Setting additional environment variables..."
+          # Use jq to parse JSON and export each key-value pair
+          echo "$additional_env" | jq -r 'to_entries[] | "export \(.key)=\(.value | @sh)"' > /tmp/env_vars.sh
+          source /tmp/env_vars.sh
+          rm -f /tmp/env_vars.sh
+        fi
+
+        # Handle Kodelet configuration
+        if [ -n "${{ inputs.kodelet-config }}" ]; then
+          # Create config directory if it doesn't exist
+          mkdir -p ~/.kodelet
+          # Write the provided YAML config content to ~/.kodelet/config.yaml
+          echo '${{ inputs.kodelet-config }}' > ~/.kodelet/config.yaml
+          echo "Written custom Kodelet config to ~/.kodelet/config.yaml"
+        elif [ -f "./kodelet-config.yaml" ]; then
+          echo "Using default Kodelet config from ./kodelet-config.yaml"
+        else
+          echo "No Kodelet config provided - using defaults"
+        fi
 
         # Determine command based on event type and PR status
         if [ "${{ inputs.event-name }}" = "pull_request_review_comment" ] || [ "${{ inputs.event-name }}" = "pull_request_review" ]; then

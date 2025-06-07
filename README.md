@@ -90,7 +90,8 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
-| `anthropic-api-key` | Anthropic API key for Kodelet | ✅ | |
+| `anthropic-api-key` | Anthropic API key for Kodelet | ❌ | |
+| `openai-api-key` | OpenAI API key for Kodelet | ❌ | |
 | `github-token` | GitHub token for repository operations | ❌ | `${{ github.token }}` |
 | `commenter` | Username who triggered the action | ❌ | Auto-detected from event |
 | `event-name` | GitHub event name | ❌ | `${{ github.event_name }}` |
@@ -103,15 +104,24 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 | `timeout-minutes` | Timeout for execution in minutes | ❌ | `15` |
 | `log-level` | Log level (debug, info, warn, error) | ❌ | `info` |
 | `kodelet-version` | Kodelet version to install (e.g., v0.0.35.alpha, latest) | ❌ | `latest` |
+| `kodelet-config` | Kodelet configuration content in YAML format | ❌ | `./kodelet-config.yaml` (if exists) |
+| `env` | Additional environment variables as JSON object | ❌ | `{}` |
 
 ## Usage Examples
 
 ### Basic Usage (Minimal Configuration)
 
 ```yaml
+# With Anthropic API
 - uses: jingkaihe/kodelet-action@v0.1.4-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    # All other inputs are automatically populated from GitHub context
+
+# With OpenAI API
+- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+  with:
+    openai-api-key: ${{ secrets.OPENAI_API_KEY }}
     # All other inputs are automatically populated from GitHub context
 ```
 
@@ -140,6 +150,24 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
     is-pr: false
 ```
 
+### Environment Variables
+
+You can pass additional environment variables to Kodelet:
+
+```yaml
+- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+  with:
+    anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    env: |
+      {
+        "DATABASE_URL": "${{ secrets.DATABASE_URL }}",
+        "API_BASE_URL": "https://api.example.com",
+        "DEBUG_MODE": "true"
+      }
+```
+
+The `env` input accepts a JSON object as a string where each key-value pair becomes an environment variable available to Kodelet during execution.
+
 ### Version Pinning
 
 You can control which version of Kodelet is installed:
@@ -161,6 +189,36 @@ You can control which version of Kodelet is installed:
 - **Development**: Use `latest` to get the newest features
 - **Testing**: Pin to specific versions to ensure reproducible results
 
+### Kodelet Configuration
+
+The action supports configurable Kodelet settings through YAML configuration content:
+
+```yaml
+# Use custom configuration content
+- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+  with:
+    anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    kodelet-config: |
+      llm_providers:
+        claude:
+          model: claude-3-5-sonnet-20241022
+        openai:
+          model: gpt-4o
+      default_llm_provider: claude
+      project_insights:
+        enabled: true
+
+# Use default configuration file (./kodelet-config.yaml) if it exists
+- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+  with:
+    anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    # Will automatically use ./kodelet-config.yaml if present
+```
+
+For configuration file format and options, see:
+- [Kodelet Configuration Documentation](https://github.com/jingkaihe/kodelet/blob/main/docs/MANUAL.md#configuration-file)
+- [Sample Configuration File](https://github.com/jingkaihe/kodelet/blob/main/config.sample.yaml)
+
 ## Permissions
 
 The action requires the following GitHub permissions:
@@ -174,7 +232,7 @@ permissions:
 
 ## Security
 
-- **API Keys**: Store your Anthropic API key in GitHub Secrets
+- **API Keys**: Store your Anthropic or OpenAI API keys in GitHub Secrets (at least one is required)
 - **GitHub Token**: Uses the automatically provided `GITHUB_TOKEN`
 - **Repository Access**: Only maintainers/collaborators can trigger the action
 - **Timeout Protection**: Execution is limited by configurable timeout
