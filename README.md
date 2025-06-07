@@ -72,7 +72,7 @@ jobs:
         run: |
           echo "YMMV"
       - name: Run Kodelet
-        uses: jingkaihe/kodelet-action@v0.1.4-alpha
+        uses: jingkaihe/kodelet-action@v0.1.5-alpha
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           # All other inputs are automatically populated from GitHub context
@@ -113,13 +113,13 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 
 ```yaml
 # With Anthropic API
-- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+- uses: jingkaihe/kodelet-action@v0.1.5-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # All other inputs are automatically populated from GitHub context
 
 # With OpenAI API
-- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+- uses: jingkaihe/kodelet-action@v0.1.5-alpha
   with:
     openai-api-key: ${{ secrets.OPENAI_API_KEY }}
     # All other inputs are automatically populated from GitHub context
@@ -128,7 +128,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 ### Custom Configuration
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+- uses: jingkaihe/kodelet-action@v0.1.5-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     timeout-minutes: 180  # 3 hours
@@ -139,7 +139,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 ### Manual Override (if needed)
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+- uses: jingkaihe/kodelet-action@v0.1.5-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # Override any auto-detected values if needed:
@@ -155,7 +155,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 You can pass additional environment variables to Kodelet:
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+- uses: jingkaihe/kodelet-action@v0.1.5-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     env: |
@@ -174,12 +174,12 @@ You can control which version of Kodelet is installed:
 
 ```yaml
 # Use latest release (default)
-- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+- uses: jingkaihe/kodelet-action@v0.1.5-alpha
   with:
     kodelet-version: latest
 
 # Pin to specific version
-- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+- uses: jingkaihe/kodelet-action@v0.1.5-alpha
   with:
     kodelet-version: 0.0.35.alpha
 ```
@@ -195,7 +195,7 @@ The action supports configurable Kodelet settings through YAML configuration con
 
 ```yaml
 # Use custom configuration content
-- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+- uses: jingkaihe/kodelet-action@v0.1.5-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     kodelet-config: |
@@ -219,7 +219,7 @@ The action supports configurable Kodelet settings through YAML configuration con
         ratio: 1
 
 # OpenAI Configuration Example
-- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+- uses: jingkaihe/kodelet-action@v0.1.5-alpha
   with:
     openai-api-key: ${{ secrets.OPENAI_API_KEY }}
     kodelet-config: |
@@ -236,7 +236,7 @@ The action supports configurable Kodelet settings through YAML configuration con
       log_format: "json"
 
 # Use default configuration file (./kodelet-config.yaml) if it exists
-- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+- uses: jingkaihe/kodelet-action@v0.1.5-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # Will automatically use ./kodelet-config.yaml if present
@@ -289,7 +289,7 @@ Failed runs include links to workflow logs for debugging.
 This action follows semantic versioning:
 
 - **Latest stable**: `@v0`
-- **Specific version**: `@v0.1.4-alpha`
+- **Specific version**: `@v0.1.5-alpha`
 - **Development**: `@main` (not recommended for production)
 
 ## Development

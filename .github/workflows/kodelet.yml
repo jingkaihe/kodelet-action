@@ -40,6 +40,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Run Kodelet
-        uses: jingkaihe/kodelet-action@v0.1.4-alpha
+        uses: jingkaihe/kodelet-action@v0.1.5-alpha
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
