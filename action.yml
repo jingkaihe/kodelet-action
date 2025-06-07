@@ -64,7 +64,7 @@ inputs:
     required: false
     default: '{}'
   kodelet-config:
-    description: 'Path to Kodelet configuration file. Defaults to ./kodelet-config.yaml if it exists'
+    description: 'Kodelet configuration content in YAML format. If provided, will be written to ~/.kodelet/config.yaml. Defaults to ./kodelet-config.yaml if it exists and no config is provided'
     required: false
 
 runs:
@@ -142,22 +142,17 @@ runs:
           rm -f /tmp/env_vars.sh
         fi
 
-        # Handle Kodelet configuration file
-        config_file=""
+        # Handle Kodelet configuration
         if [ -n "${{ inputs.kodelet-config }}" ]; then
-          # Use specified config file
-          config_file="${{ inputs.kodelet-config }}"
-          echo "Using specified Kodelet config: $config_file"
+          # Create config directory if it doesn't exist
+          mkdir -p ~/.kodelet
+          # Write the provided YAML config content to ~/.kodelet/config.yaml
+          echo '${{ inputs.kodelet-config }}' > ~/.kodelet/config.yaml
+          echo "Written custom Kodelet config to ~/.kodelet/config.yaml"
         elif [ -f "./kodelet-config.yaml" ]; then
-          # Use default config file if it exists
-          config_file="./kodelet-config.yaml"
-          echo "Using default Kodelet config: $config_file"
-        fi
-
-        # Build config flag if config file is specified
-        config_flag=""
-        if [ -n "$config_file" ]; then
-          config_flag="--config $config_file"
+          echo "Using default Kodelet config from ./kodelet-config.yaml"
+        else
+          echo "No Kodelet config provided - using defaults"
         fi
 
         # Determine command based on event type and PR status
@@ -165,16 +160,16 @@ runs:
           # Handle PR review comments - use review-id parameter
           PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.pr-number }}"
           REVIEW_ID="${{ inputs.review-id }}"
-          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --review-id "$REVIEW_ID" $config_flag
+          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --review-id "$REVIEW_ID"
         elif [ "${{ inputs.is-pr }}" = "true" ]; then
           # Handle PR comments (issue_comment on PR) - use issue-comment-id parameter
           PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.issue-number }}"
           COMMENT_ID="${{ inputs.comment-id }}"
-          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --issue-comment-id "$COMMENT_ID" $config_flag
+          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --issue-comment-id "$COMMENT_ID"
         else
           # Handle regular issue comments
           ISSUE_URL="https://github.com/${{ inputs.repository }}/issues/${{ inputs.issue-number }}"
-          timeout ${timeout_seconds}s kodelet resolve --issue-url "$ISSUE_URL" $config_flag
+          timeout ${timeout_seconds}s kodelet resolve --issue-url "$ISSUE_URL"
         fi
 
     - name: Handle errors
