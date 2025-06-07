@@ -7,7 +7,10 @@ branding:
 inputs:
   anthropic-api-key:
     description: 'Anthropic API key for Kodelet'
-    required: true
+    required: false
+  openai-api-key:
+    description: 'OpenAI API key for Kodelet'
+    required: false
   github-token:
     description: 'GitHub token for repository operations'
     required: true
@@ -60,6 +63,9 @@ inputs:
     description: 'Additional environment variables for Kodelet execution (JSON object as string, e.g., {"VAR1": "value1", "VAR2": "value2"})'
     required: false
     default: '{}'
+  kodelet-config:
+    description: 'Path to Kodelet configuration file. Defaults to ./kodelet-config.yaml if it exists'
+    required: false
 
 runs:
   using: 'composite'
@@ -118,6 +124,7 @@ runs:
       shell: bash
       env:
         ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        OPENAI_API_KEY: ${{ inputs.openai-api-key }}
         GITHUB_TOKEN: ${{ inputs.github-token }}
         KODELET_LOG_LEVEL: ${{ inputs.log-level }}
       run: |
@@ -135,21 +142,39 @@ runs:
           rm -f /tmp/env_vars.sh
         fi
 
+        # Handle Kodelet configuration file
+        config_file=""
+        if [ -n "${{ inputs.kodelet-config }}" ]; then
+          # Use specified config file
+          config_file="${{ inputs.kodelet-config }}"
+          echo "Using specified Kodelet config: $config_file"
+        elif [ -f "./kodelet-config.yaml" ]; then
+          # Use default config file if it exists
+          config_file="./kodelet-config.yaml"
+          echo "Using default Kodelet config: $config_file"
+        fi
+
+        # Build config flag if config file is specified
+        config_flag=""
+        if [ -n "$config_file" ]; then
+          config_flag="--config $config_file"
+        fi
+
         # Determine command based on event type and PR status
         if [ "${{ inputs.event-name }}" = "pull_request_review_comment" ] || [ "${{ inputs.event-name }}" = "pull_request_review" ]; then
           # Handle PR review comments - use review-id parameter
           PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.pr-number }}"
           REVIEW_ID="${{ inputs.review-id }}"
-          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --review-id "$REVIEW_ID"
+          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --review-id "$REVIEW_ID" $config_flag
         elif [ "${{ inputs.is-pr }}" = "true" ]; then
           # Handle PR comments (issue_comment on PR) - use issue-comment-id parameter
           PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.issue-number }}"
           COMMENT_ID="${{ inputs.comment-id }}"
-          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --issue-comment-id "$COMMENT_ID"
+          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --issue-comment-id "$COMMENT_ID" $config_flag
         else
           # Handle regular issue comments
           ISSUE_URL="https://github.com/${{ inputs.repository }}/issues/${{ inputs.issue-number }}"
-          timeout ${timeout_seconds}s kodelet resolve --issue-url "$ISSUE_URL"
+          timeout ${timeout_seconds}s kodelet resolve --issue-url "$ISSUE_URL" $config_flag
         fi
 
     - name: Handle errors
