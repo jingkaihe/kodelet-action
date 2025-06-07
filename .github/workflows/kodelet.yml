@@ -1,0 +1,45 @@
+name: Background Kodelet Agent
+
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [opened, assigned]
+  pull_request_review_comment:
+    types: [created]
+  pull_request_review:
+    types: [submitted]
+
+permissions:
+  issues: write          # Comment on issues
+  pull-requests: write   # Create PRs
+  contents: write        # Push commits
+env:
+  TIMEOUT_MINUTES: "15"
+
+jobs:
+  kodelet-agent:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360  # 6 hours
+    if: |
+      (
+        (github.event_name == 'issues' && contains(github.event.issue.body, '@kodelet')) ||
+        (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@kodelet')) ||
+        (github.event_name == 'pull_request_review_comment' && contains(github.event.comment.body, '@kodelet')) ||
+        (github.event_name == 'pull_request_review' && contains(github.event.review.body, '@kodelet'))
+      ) &&
+      (
+        (github.event.issue.author_association == 'OWNER' || github.event.issue.author_association == 'MEMBER' || github.event.issue.author_association == 'COLLABORATOR') ||
+        (github.event.comment.author_association == 'OWNER' || github.event.comment.author_association == 'MEMBER' || github.event.comment.author_association == 'COLLABORATOR') ||
+        (github.event.review.author_association == 'OWNER' || github.event.review.author_association == 'MEMBER' || github.event.review.author_association == 'COLLABORATOR')
+      )
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Run Kodelet
+        uses: jingkaihe/kodelet-action@v0.1.4-alpha
+        with:
+          anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
