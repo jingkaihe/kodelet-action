@@ -149,10 +149,6 @@ runs:
           # Write the provided YAML config content to ~/.kodelet/config.yaml
           echo '${{ inputs.kodelet-config }}' > ~/.kodelet/config.yaml
           echo "Written custom Kodelet config to ~/.kodelet/config.yaml"
-        elif [ -f "./kodelet-config.yaml" ]; then
-          echo "Using default Kodelet config from ./kodelet-config.yaml"
-        else
-          echo "No Kodelet config provided - using defaults"
         fi
 
         # Determine command based on event type and PR status

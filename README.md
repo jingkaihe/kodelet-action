@@ -104,7 +104,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 | `timeout-minutes` | Timeout for execution in minutes | ❌ | `15` |
 | `log-level` | Log level (debug, info, warn, error) | ❌ | `info` |
 | `kodelet-version` | Kodelet version to install (e.g., v0.0.35.alpha, latest) | ❌ | `latest` |
-| `kodelet-config` | Kodelet configuration content in YAML format | ❌ | `./kodelet-config.yaml` (if exists) |
+| `kodelet-config` | Kodelet configuration content in YAML format | ❌ | if empty `./kodelet-config.yaml` will be used |
 | `env` | Additional environment variables as JSON object | ❌ | `{}` |
 
 ## Usage Examples
@@ -201,12 +201,19 @@ The action supports configurable Kodelet settings through YAML configuration con
     kodelet-config: |
       llm_providers:
         claude:
+          api_key: ${ANTHROPIC_API_KEY}
           model: claude-3-5-sonnet-20241022
+          max_tokens: 8192
+          temperature: 0.1
         openai:
+          api_key: ${OPENAI_API_KEY}
           model: gpt-4o
+          max_tokens: 4096
+          temperature: 0.1
       default_llm_provider: claude
       project_insights:
         enabled: true
+        cache_ttl: 3600
 
 # Use default configuration file (./kodelet-config.yaml) if it exists
 - uses: jingkaihe/kodelet-action@v0.1.4-alpha
