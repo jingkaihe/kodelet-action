@@ -199,21 +199,41 @@ The action supports configurable Kodelet settings through YAML configuration con
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     kodelet-config: |
-      llm_providers:
-        claude:
-          api_key: ${ANTHROPIC_API_KEY}
-          model: claude-3-5-sonnet-20241022
-          max_tokens: 8192
-          temperature: 0.1
-        openai:
-          api_key: ${OPENAI_API_KEY}
-          model: gpt-4o
-          max_tokens: 4096
-          temperature: 0.1
-      default_llm_provider: claude
-      project_insights:
+      # Logging Configuration
+      log_level: "info"
+      log_format: "json"
+
+      # LLM Configuration
+      provider: "anthropic"
+      model: "claude-sonnet-4-0"
+      max_tokens: 8192
+      thinking_budget_tokens: 4048
+      weak_model: "claude-3-5-haiku-latest"
+      weak_model_max_tokens: 8192
+      reasoning_effort: "medium"
+
+      # Tracing Configuration
+      tracing:
         enabled: true
-        cache_ttl: 3600
+        sampler: always
+        ratio: 1
+
+# OpenAI Configuration Example
+- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+  with:
+    openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+    kodelet-config: |
+      # LLM Configuration for OpenAI
+      provider: "openai"
+      model: "o4-mini"
+      max_tokens: 8192
+      weak_model: "gpt-4.1-mini"
+      weak_model_max_tokens: 4096
+      reasoning_effort: "medium"
+
+      # Logging Configuration
+      log_level: "info"
+      log_format: "json"
 
 # Use default configuration file (./kodelet-config.yaml) if it exists
 - uses: jingkaihe/kodelet-action@v0.1.4-alpha
