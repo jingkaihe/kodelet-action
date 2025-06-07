@@ -103,6 +103,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 | `timeout-minutes` | Timeout for execution in minutes | ❌ | `15` |
 | `log-level` | Log level (debug, info, warn, error) | ❌ | `info` |
 | `kodelet-version` | Kodelet version to install (e.g., v0.0.35.alpha, latest) | ❌ | `latest` |
+| `env` | Additional environment variables as JSON object | ❌ | `{}` |
 
 ## Usage Examples
 
@@ -139,6 +140,24 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
     repository: owner/repo
     is-pr: false
 ```
+
+### Environment Variables
+
+You can pass additional environment variables to Kodelet:
+
+```yaml
+- uses: jingkaihe/kodelet-action@v0.1.4-alpha
+  with:
+    anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    env: |
+      {
+        "DATABASE_URL": "${{ secrets.DATABASE_URL }}",
+        "API_BASE_URL": "https://api.example.com",
+        "DEBUG_MODE": "true"
+      }
+```
+
+The `env` input accepts a JSON object as a string where each key-value pair becomes an environment variable available to Kodelet during execution.
 
 ### Version Pinning
 

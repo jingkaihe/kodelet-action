@@ -56,6 +56,10 @@ inputs:
     description: 'Kodelet version to install (e.g., 0.0.35.alpha, latest)'
     required: false
     default: 'latest'
+  env:
+    description: 'Additional environment variables for Kodelet execution (JSON object as string, e.g., {"VAR1": "value1", "VAR2": "value2"})'
+    required: false
+    default: '{}'
 
 runs:
   using: 'composite'
@@ -120,6 +124,16 @@ runs:
         # Set timeout for command execution
         timeout_minutes="${{ inputs.timeout-minutes }}"
         timeout_seconds=$((timeout_minutes * 60))
+        
+        # Parse and export additional environment variables
+        additional_env='${{ inputs.env }}'
+        if [ "$additional_env" != "{}" ] && [ -n "$additional_env" ]; then
+          echo "Setting additional environment variables..."
+          # Use jq to parse JSON and export each key-value pair
+          echo "$additional_env" | jq -r 'to_entries[] | "export \(.key)=\(.value | @sh)"' > /tmp/env_vars.sh
+          source /tmp/env_vars.sh
+          rm -f /tmp/env_vars.sh
+        fi
 
         # Determine command based on event type and PR status
         if [ "${{ inputs.event-name }}" = "pull_request_review_comment" ] || [ "${{ inputs.event-name }}" = "pull_request_review" ]; then
