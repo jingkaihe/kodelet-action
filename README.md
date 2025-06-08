@@ -90,23 +90,23 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
-| `anthropic-api-key` | Anthropic API key for Kodelet | ❌ | |
-| `openai-api-key` | OpenAI API key for Kodelet | ❌ | |
-| `github-token` | GitHub token for repository operations | ❌ | `${{ github.token }}` |
-| `commenter` | Username who triggered the action | ❌ | Auto-detected from event |
-| `event-name` | GitHub event name | ❌ | `${{ github.event_name }}` |
-| `issue-number` | Issue or PR number | ❌ | Auto-detected from event |
-| `comment-id` | Comment ID (for issue comments on PRs) | ❌ | Auto-detected from event |
-| `review-id` | Review ID (for PR review comments) | ❌ | Auto-detected from event |
-| `repository` | Repository in format owner/repo | ❌ | `${{ github.repository }}` |
-| `is-pr` | Whether this is a pull request | ❌ | Auto-detected from event |
-| `pr-number` | Pull request number | ❌ | Auto-detected from event |
-| `timeout-minutes` | Timeout for execution in minutes | ❌ | `15` |
-| `log-level` | Log level (debug, info, warn, error) | ❌ | `info` |
-| `kodelet-version` | Kodelet version to install (e.g., v0.0.35.alpha, latest) | ❌ | `latest` |
-| `kodelet-config` | Kodelet configuration content in YAML format | ❌ | if empty `./kodelet-config.yaml` will be used |
-| `env` | Additional environment variables as JSON object | ❌ | `{}` |
-| `max-turns` | Maximum number of turns for Kodelet execution | ❌ | `0` |
+| `anthropic-api-key` | Anthropic API key for Kodelet | No | |
+| `openai-api-key` | OpenAI API key for Kodelet | No | |
+| `github-token` | GitHub token for repository operations | No | `${{ github.token }}` |
+| `commenter` | Username who triggered the action | No | Auto-detected from event |
+| `event-name` | GitHub event name | No | `${{ github.event_name }}` |
+| `issue-number` | Issue or PR number | No | Auto-detected from event |
+| `comment-id` | Comment ID (for issue comments on PRs) | No | Auto-detected from event |
+| `review-id` | Review ID (for PR review comments) | No | Auto-detected from event |
+| `repository` | Repository in format owner/repo | No | `${{ github.repository }}` |
+| `is-pr` | Whether this is a pull request | No | Auto-detected from event |
+| `pr-number` | Pull request number | No | Auto-detected from event |
+| `timeout-minutes` | Timeout for execution in minutes | No | `15` |
+| `log-level` | Log level (debug, info, warn, error) | No | `info` |
+| `kodelet-version` | Kodelet version to install (e.g., v0.0.35.alpha, latest) | No | `latest` |
+| `kodelet-config` | Kodelet configuration content in YAML format | No | if empty `./kodelet-config.yaml` will be used |
+| `env` | Additional environment variables as JSON object | No | `{}` |
+| `max-turns` | Maximum number of turns for Kodelet execution | No | `0` |
 
 ## Usage Examples
 
