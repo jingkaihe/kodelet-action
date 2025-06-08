@@ -135,7 +135,7 @@ runs:
         # Set timeout for command execution
         timeout_minutes="${{ inputs.timeout-minutes }}"
         timeout_seconds=$((timeout_minutes * 60))
-        
+
         # Parse and export additional environment variables
         additional_env='${{ inputs.env }}'
         if [ "$additional_env" != "{}" ] && [ -n "$additional_env" ]; then
@@ -161,7 +161,7 @@ runs:
         if [ "$max_turns" != "0" ] && [ -n "$max_turns" ]; then
           kodelet_args="--max-turns $max_turns"
         fi
-        
+
         if [ "${{ inputs.event-name }}" = "pull_request_review_comment" ] || [ "${{ inputs.event-name }}" = "pull_request_review" ]; then
           # Handle PR review comments - use review-id parameter
           PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.pr-number }}"
@@ -175,7 +175,7 @@ runs:
         else
           # Handle regular issue comments
           ISSUE_URL="https://github.com/${{ inputs.repository }}/issues/${{ inputs.issue-number }}"
-          timeout ${timeout_seconds}s kodelet resolve --issue-url "$ISSUE_URL" $kodelet_args
+          timeout ${timeout_seconds}s kodelet issue-resolve --issue-url "$ISSUE_URL" $kodelet_args
         fi
 
     - name: Handle errors

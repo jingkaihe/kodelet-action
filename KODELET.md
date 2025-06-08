@@ -28,7 +28,7 @@ Main action with inputs: `anthropic-api-key`, `github-token`, `commenter`, `even
 Steps: Status comment → Install Kodelet → Configure Git → Run Kodelet → Error handling
 
 ### Event Handling
-- `issue_comment`: Comments on issues → `kodelet resolve --issue-url`
+- `issue_comment`: Comments on issues → `kodelet issue-resolve --issue-url`
 - `issue_comment` (on PR): Comments on PRs → `kodelet pr-respond --pr-url --issue-comment-id`
 - `pull_request_review_comment`: Inline PR comments → `kodelet pr-respond --pr-url --review-id`
 - `pull_request_review`: PR review submissions → `kodelet pr-respond --pr-url --review-id`

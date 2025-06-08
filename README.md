@@ -270,7 +270,7 @@ permissions:
 
 | Event | Description | Kodelet Command |
 |-------|-------------|-----------------|
-| `issue_comment` | Comments on issues | `kodelet resolve --issue-url` |
+| `issue_comment` | Comments on issues | `kodelet issue-resolve --issue-url` |
 | `issue_comment` (on PR) | Comments on pull requests | `kodelet pr-respond --pr-url --issue-comment-id` |
 | `pull_request_review_comment` | Inline PR review comments | `kodelet pr-respond --pr-url --review-id` |
 | `pull_request_review` | PR review submissions | `kodelet pr-respond --pr-url --review-id` |
