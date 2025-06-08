@@ -28,7 +28,7 @@ Main action with inputs: `anthropic-api-key`, `github-token`, `commenter`, `even
 Steps: Status comment → Install Kodelet → Configure Git → Run Kodelet → Error handling
 
 ### Event Handling
-- `issue_comment`: Comments on issues → `kodelet resolve --issue-url`
+- `issue_comment`: Comments on issues → `kodelet issue-resolve --issue-url`
 - `issue_comment` (on PR): Comments on PRs → `kodelet pr-respond --pr-url --issue-comment-id`
 - `pull_request_review_comment`: Inline PR comments → `kodelet pr-respond --pr-url --review-id`
 - `pull_request_review`: PR review submissions → `kodelet pr-respond --pr-url --review-id`
@@ -48,7 +48,7 @@ permissions:
 
 ## Configuration
 - **Timeout**: Default 15min, max 360min
-- **Versioning**: `latest`, `v0.1.5-alpha`
+- **Versioning**: `latest`, `v0.1.6-alpha`
 
 ## Coding Conventions
 - **YAML**: Single quotes, 2-space indent, descriptive step names

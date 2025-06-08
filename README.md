@@ -72,7 +72,7 @@ jobs:
         run: |
           echo "YMMV"
       - name: Run Kodelet
-        uses: jingkaihe/kodelet-action@v0.1.5-alpha
+        uses: jingkaihe/kodelet-action@v0.1.6-alpha
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           # All other inputs are automatically populated from GitHub context
@@ -90,22 +90,23 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 
 | Input | Description | Required | Default |
 |-------|-------------|----------|---------|
-| `anthropic-api-key` | Anthropic API key for Kodelet | ❌ | |
-| `openai-api-key` | OpenAI API key for Kodelet | ❌ | |
-| `github-token` | GitHub token for repository operations | ❌ | `${{ github.token }}` |
-| `commenter` | Username who triggered the action | ❌ | Auto-detected from event |
-| `event-name` | GitHub event name | ❌ | `${{ github.event_name }}` |
-| `issue-number` | Issue or PR number | ❌ | Auto-detected from event |
-| `comment-id` | Comment ID (for issue comments on PRs) | ❌ | Auto-detected from event |
-| `review-id` | Review ID (for PR review comments) | ❌ | Auto-detected from event |
-| `repository` | Repository in format owner/repo | ❌ | `${{ github.repository }}` |
-| `is-pr` | Whether this is a pull request | ❌ | Auto-detected from event |
-| `pr-number` | Pull request number | ❌ | Auto-detected from event |
-| `timeout-minutes` | Timeout for execution in minutes | ❌ | `15` |
-| `log-level` | Log level (debug, info, warn, error) | ❌ | `info` |
-| `kodelet-version` | Kodelet version to install (e.g., v0.0.35.alpha, latest) | ❌ | `latest` |
-| `kodelet-config` | Kodelet configuration content in YAML format | ❌ | if empty `./kodelet-config.yaml` will be used |
-| `env` | Additional environment variables as JSON object | ❌ | `{}` |
+| `anthropic-api-key` | Anthropic API key for Kodelet | No | |
+| `openai-api-key` | OpenAI API key for Kodelet | No | |
+| `github-token` | GitHub token for repository operations | No | `${{ github.token }}` |
+| `commenter` | Username who triggered the action | No | Auto-detected from event |
+| `event-name` | GitHub event name | No | `${{ github.event_name }}` |
+| `issue-number` | Issue or PR number | No | Auto-detected from event |
+| `comment-id` | Comment ID (for issue comments on PRs) | No | Auto-detected from event |
+| `review-id` | Review ID (for PR review comments) | No | Auto-detected from event |
+| `repository` | Repository in format owner/repo | No | `${{ github.repository }}` |
+| `is-pr` | Whether this is a pull request | No | Auto-detected from event |
+| `pr-number` | Pull request number | No | Auto-detected from event |
+| `timeout-minutes` | Timeout for execution in minutes | No | `15` |
+| `log-level` | Log level (debug, info, warn, error) | No | `info` |
+| `kodelet-version` | Kodelet version to install (e.g., v0.0.35.alpha, latest) | No | `latest` |
+| `kodelet-config` | Kodelet configuration content in YAML format | No | if empty `./kodelet-config.yaml` will be used |
+| `env` | Additional environment variables as JSON object | No | `{}` |
+| `max-turns` | Maximum number of turns for Kodelet execution | No | `0` |
 
 ## Usage Examples
 
@@ -113,13 +114,13 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 
 ```yaml
 # With Anthropic API
-- uses: jingkaihe/kodelet-action@v0.1.5-alpha
+- uses: jingkaihe/kodelet-action@v0.1.6-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # All other inputs are automatically populated from GitHub context
 
 # With OpenAI API
-- uses: jingkaihe/kodelet-action@v0.1.5-alpha
+- uses: jingkaihe/kodelet-action@v0.1.6-alpha
   with:
     openai-api-key: ${{ secrets.OPENAI_API_KEY }}
     # All other inputs are automatically populated from GitHub context
@@ -128,18 +129,19 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 ### Custom Configuration
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.5-alpha
+- uses: jingkaihe/kodelet-action@v0.1.6-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     timeout-minutes: 180  # 3 hours
     log-level: debug
     kodelet-version: v0.0.35.alpha  # Pin to specific version
+    max-turns: 10  # Limit Kodelet to maximum 10 turns
 ```
 
 ### Manual Override (if needed)
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.5-alpha
+- uses: jingkaihe/kodelet-action@v0.1.6-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # Override any auto-detected values if needed:
@@ -155,7 +157,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 You can pass additional environment variables to Kodelet:
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.5-alpha
+- uses: jingkaihe/kodelet-action@v0.1.6-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     env: |
@@ -174,12 +176,12 @@ You can control which version of Kodelet is installed:
 
 ```yaml
 # Use latest release (default)
-- uses: jingkaihe/kodelet-action@v0.1.5-alpha
+- uses: jingkaihe/kodelet-action@v0.1.6-alpha
   with:
     kodelet-version: latest
 
 # Pin to specific version
-- uses: jingkaihe/kodelet-action@v0.1.5-alpha
+- uses: jingkaihe/kodelet-action@v0.1.6-alpha
   with:
     kodelet-version: 0.0.35.alpha
 ```
@@ -195,7 +197,7 @@ The action supports configurable Kodelet settings through YAML configuration con
 
 ```yaml
 # Use custom configuration content
-- uses: jingkaihe/kodelet-action@v0.1.5-alpha
+- uses: jingkaihe/kodelet-action@v0.1.6-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     kodelet-config: |
@@ -219,7 +221,7 @@ The action supports configurable Kodelet settings through YAML configuration con
         ratio: 1
 
 # OpenAI Configuration Example
-- uses: jingkaihe/kodelet-action@v0.1.5-alpha
+- uses: jingkaihe/kodelet-action@v0.1.6-alpha
   with:
     openai-api-key: ${{ secrets.OPENAI_API_KEY }}
     kodelet-config: |
@@ -236,7 +238,7 @@ The action supports configurable Kodelet settings through YAML configuration con
       log_format: "json"
 
 # Use default configuration file (./kodelet-config.yaml) if it exists
-- uses: jingkaihe/kodelet-action@v0.1.5-alpha
+- uses: jingkaihe/kodelet-action@v0.1.6-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # Will automatically use ./kodelet-config.yaml if present
@@ -268,7 +270,7 @@ permissions:
 
 | Event | Description | Kodelet Command |
 |-------|-------------|-----------------|
-| `issue_comment` | Comments on issues | `kodelet resolve --issue-url` |
+| `issue_comment` | Comments on issues | `kodelet issue-resolve --issue-url` |
 | `issue_comment` (on PR) | Comments on pull requests | `kodelet pr-respond --pr-url --issue-comment-id` |
 | `pull_request_review_comment` | Inline PR review comments | `kodelet pr-respond --pr-url --review-id` |
 | `pull_request_review` | PR review submissions | `kodelet pr-respond --pr-url --review-id` |
@@ -289,7 +291,7 @@ Failed runs include links to workflow logs for debugging.
 This action follows semantic versioning:
 
 - **Latest stable**: `@v0`
-- **Specific version**: `@v0.1.5-alpha`
+- **Specific version**: `@v0.1.6-alpha`
 - **Development**: `@main` (not recommended for production)
 
 ## Development

@@ -66,6 +66,10 @@ inputs:
   kodelet-config:
     description: 'Kodelet configuration content in YAML format. If provided, will be written to ~/.kodelet/config.yaml. Defaults to ./kodelet-config.yaml if it exists and no config is provided'
     required: false
+  max-turns:
+    description: 'Maximum number of turns for Kodelet execution'
+    required: false
+    default: '0'
 
 runs:
   using: 'composite'
@@ -131,7 +135,7 @@ runs:
         # Set timeout for command execution
         timeout_minutes="${{ inputs.timeout-minutes }}"
         timeout_seconds=$((timeout_minutes * 60))
-        
+
         # Parse and export additional environment variables
         additional_env='${{ inputs.env }}'
         if [ "$additional_env" != "{}" ] && [ -n "$additional_env" ]; then
@@ -152,20 +156,26 @@ runs:
         fi
 
         # Determine command based on event type and PR status
+        max_turns="${{ inputs.max-turns }}"
+        kodelet_args=""
+        if [ "$max_turns" != "0" ] && [ -n "$max_turns" ]; then
+          kodelet_args="--max-turns $max_turns"
+        fi
+
         if [ "${{ inputs.event-name }}" = "pull_request_review_comment" ] || [ "${{ inputs.event-name }}" = "pull_request_review" ]; then
           # Handle PR review comments - use review-id parameter
           PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.pr-number }}"
           REVIEW_ID="${{ inputs.review-id }}"
-          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --review-id "$REVIEW_ID"
+          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --review-id "$REVIEW_ID" $kodelet_args
         elif [ "${{ inputs.is-pr }}" = "true" ]; then
           # Handle PR comments (issue_comment on PR) - use issue-comment-id parameter
           PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.issue-number }}"
           COMMENT_ID="${{ inputs.comment-id }}"
-          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --issue-comment-id "$COMMENT_ID"
+          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --issue-comment-id "$COMMENT_ID" $kodelet_args
         else
           # Handle regular issue comments
           ISSUE_URL="https://github.com/${{ inputs.repository }}/issues/${{ inputs.issue-number }}"
-          timeout ${timeout_seconds}s kodelet resolve --issue-url "$ISSUE_URL"
+          timeout ${timeout_seconds}s kodelet issue-resolve --issue-url "$ISSUE_URL" $kodelet_args
         fi
 
     - name: Handle errors
