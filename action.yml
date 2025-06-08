@@ -66,6 +66,10 @@ inputs:
   kodelet-config:
     description: 'Kodelet configuration content in YAML format. If provided, will be written to ~/.kodelet/config.yaml. Defaults to ./kodelet-config.yaml if it exists and no config is provided'
     required: false
+  max-turns:
+    description: 'Maximum number of turns for Kodelet execution'
+    required: false
+    default: '0'
 
 runs:
   using: 'composite'
@@ -152,20 +156,26 @@ runs:
         fi
 
         # Determine command based on event type and PR status
+        max_turns="${{ inputs.max-turns }}"
+        max_turns_arg=""
+        if [ "$max_turns" != "0" ] && [ -n "$max_turns" ]; then
+          max_turns_arg="--max-turns $max_turns"
+        fi
+        
         if [ "${{ inputs.event-name }}" = "pull_request_review_comment" ] || [ "${{ inputs.event-name }}" = "pull_request_review" ]; then
           # Handle PR review comments - use review-id parameter
           PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.pr-number }}"
           REVIEW_ID="${{ inputs.review-id }}"
-          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --review-id "$REVIEW_ID"
+          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --review-id "$REVIEW_ID" $max_turns_arg
         elif [ "${{ inputs.is-pr }}" = "true" ]; then
           # Handle PR comments (issue_comment on PR) - use issue-comment-id parameter
           PR_URL="https://github.com/${{ inputs.repository }}/pull/${{ inputs.issue-number }}"
           COMMENT_ID="${{ inputs.comment-id }}"
-          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --issue-comment-id "$COMMENT_ID"
+          timeout ${timeout_seconds}s kodelet pr-respond --pr-url "$PR_URL" --issue-comment-id "$COMMENT_ID" $max_turns_arg
         else
           # Handle regular issue comments
           ISSUE_URL="https://github.com/${{ inputs.repository }}/issues/${{ inputs.issue-number }}"
-          timeout ${timeout_seconds}s kodelet resolve --issue-url "$ISSUE_URL"
+          timeout ${timeout_seconds}s kodelet resolve --issue-url "$ISSUE_URL" $max_turns_arg
         fi
 
     - name: Handle errors

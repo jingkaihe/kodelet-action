@@ -106,6 +106,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 | `kodelet-version` | Kodelet version to install (e.g., v0.0.35.alpha, latest) | ❌ | `latest` |
 | `kodelet-config` | Kodelet configuration content in YAML format | ❌ | if empty `./kodelet-config.yaml` will be used |
 | `env` | Additional environment variables as JSON object | ❌ | `{}` |
+| `max-turns` | Maximum number of turns for Kodelet execution | ❌ | `0` |
 
 ## Usage Examples
 
@@ -134,6 +135,7 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
     timeout-minutes: 180  # 3 hours
     log-level: debug
     kodelet-version: v0.0.35.alpha  # Pin to specific version
+    max-turns: 10  # Limit Kodelet to maximum 10 turns
 ```
 
 ### Manual Override (if needed)
