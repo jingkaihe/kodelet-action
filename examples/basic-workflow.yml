@@ -20,14 +20,14 @@ on:
   pull_request_review:
     types: [submitted]
 
-permissions:
-  issues: write          # Comment on issues
-  pull-requests: write   # Comment on PRs and create PRs
-  contents: write        # Push commits and create branches
-
 jobs:
   background-agent:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      issues: read
+      pull-requests: read
+      contents: read
     timeout-minutes: 360  # 6 hours max execution time
 
     if: |
@@ -64,7 +64,7 @@ jobs:
           # is-pr: false
           # pr-number: 789
           # kodelet-version: latest
-          
+
           # Optional: Pass additional environment variables to Kodelet
           # env: |
           #   {

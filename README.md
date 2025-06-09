@@ -41,14 +41,15 @@ on:
   pull_request_review:
     types: [submitted]
 
-permissions:
-  issues: write
-  pull-requests: write
-  contents: write
 
 jobs:
   background-agent:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      issues: read
+      pull-requests: read
+      contents: read
     timeout-minutes: 15  # 15 minutes
     if: |
       (
@@ -92,7 +93,8 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 |-------|-------------|----------|---------|
 | `anthropic-api-key` | Anthropic API key for Kodelet | No | |
 | `openai-api-key` | OpenAI API key for Kodelet | No | |
-| `github-token` | GitHub token for repository operations | No | `${{ github.token }}` |
+| `github-token` | GitHub token for repository operations | No | Auto-resolved via auth gateway |
+| `auth-gateway-endpoint` | Auth gateway endpoint URL to obtain GitHub token | No | `https://gha-auth-gateway.kodelet.com/api/github` |
 | `commenter` | Username who triggered the action | No | Auto-detected from event |
 | `event-name` | GitHub event name | No | `${{ github.event_name }}` |
 | `issue-number` | Issue or PR number | No | Auto-detected from event |
@@ -124,6 +126,32 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
   with:
     openai-api-key: ${{ secrets.OPENAI_API_KEY }}
     # All other inputs are automatically populated from GitHub context
+```
+
+### Auth Gateway Authentication
+
+By default, the action uses the Auth Gateway to obtain a GitHub token instead of the standard `GITHUB_TOKEN`. This provides several benefits:
+
+- **Enhanced Triggers**: Pull requests and git pushes will trigger follow-up workflow runs (unlike the default GitHub Actions token)
+- **Kodelet User Context**: Actions appear as performed by the `kodelet` user
+
+The action automatically handles authentication via the auth gateway. To use a custom GitHub token instead:
+
+```yaml
+- uses: jingkaihe/kodelet-action@v0.1.6-alpha
+  with:
+    anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+    github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}  # Override auth gateway
+```
+
+Required permissions for auth gateway usage:
+
+```yaml
+permissions:
+  id-token: write        # Required for auth gateway authentication
+  issues: write          # Comment on issues
+  pull-requests: write   # Comment on PRs
+  contents: write        # Push commits and create branches
 ```
 
 ### Custom Configuration
@@ -254,6 +282,7 @@ The action requires the following GitHub permissions:
 
 ```yaml
 permissions:
+  id-token: write        # Required for auth gateway authentication
   issues: write          # Comment on issues
   pull-requests: write   # Comment on PRs
   contents: write        # Push commits and create branches
@@ -262,7 +291,8 @@ permissions:
 ## Security
 
 - **API Keys**: Store your Anthropic or OpenAI API keys in GitHub Secrets (at least one is required)
-- **GitHub Token**: Uses the automatically provided `GITHUB_TOKEN`
+- **GitHub Token**: Uses the Auth Gateway with OIDC authentication by default, or custom `GITHUB_TOKEN` if provided
+- **Auth Gateway**: Securely authenticates using GitHub's OIDC ID tokens to obtain enhanced GitHub access tokens
 - **Repository Access**: Only maintainers/collaborators can trigger the action
 - **Timeout Protection**: Execution is limited by configurable timeout
 
