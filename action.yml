@@ -84,7 +84,7 @@ runs:
         script: |
           if ('${{ inputs.github-token }}') {
             console.log('Using provided GitHub token');
-            core.exportVariable('RESOLVED_GITHUB_TOKEN', '${{ inputs.github-token }}');
+            core.exportVariable('GITHUB_TOKEN', '${{ inputs.github-token }}');
             return;
           }
 
@@ -113,12 +113,12 @@ runs:
           }
 
           core.setSecret(accessToken);
-          core.exportVariable('RESOLVED_GITHUB_TOKEN', accessToken);
+          core.exportVariable('GITHUB_TOKEN', accessToken);
 
     - name: Post status comment
       uses: actions/github-script@v7
       with:
-        github-token: ${{ env.RESOLVED_GITHUB_TOKEN }}
+        github-token: ${{ env.GITHUB_TOKEN }}
         script: |
           // Determine the correct issue/PR number and type
           const issueNumber = parseInt('${{ inputs.issue-number }}');
@@ -145,7 +145,6 @@ runs:
     - name: Configure Git
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ env.RESOLVED_GITHUB_TOKEN }}
         COMMENTER: ${{ inputs.commenter }}
       run: |
         # Try to get the user's public email first
@@ -170,9 +169,16 @@ runs:
       env:
         ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
         OPENAI_API_KEY: ${{ inputs.openai-api-key }}
-        GITHUB_TOKEN: ${{ env.RESOLVED_GITHUB_TOKEN }}
         KODELET_LOG_LEVEL: ${{ inputs.log-level }}
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
       run: |
+        # reset the remote url so that the token is used
+        git remote set-url origin https://kodelet:$GITHUB_TOKEN@github.com/${{ inputs.repository }}
+        # tidy up the git config added by the checkout action
+        git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+        git config --local --unset-all http.https://github.com/.extraheader
+        git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+
         # Set timeout for command execution
         timeout_minutes="${{ inputs.timeout-minutes }}"
         timeout_seconds=$((timeout_minutes * 60))
@@ -223,7 +229,7 @@ runs:
       uses: actions/github-script@v7
       if: failure()
       with:
-        github-token: ${{ env.RESOLVED_GITHUB_TOKEN }}
+        github-token: ${{ env.GITHUB_TOKEN }}
         script: |
           const issueNumber = parseInt('${{ inputs.issue-number }}');
           const isPR = '${{ inputs.is-pr }}' === 'true';
