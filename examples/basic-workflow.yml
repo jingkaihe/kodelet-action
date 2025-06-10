@@ -47,7 +47,6 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Full clone for proper git operations
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Run Kodelet
@@ -72,3 +71,13 @@ jobs:
           #     "API_BASE_URL": "https://api.example.com",
           #     "DEBUG_MODE": "true"
           #   }
+
+          # use github token if you don't want to install Kodelet app in the repo
+          # Considerations:
+          # - You can use the token from the GitHub Action, however any code push or PR raise [won't trigger](https://github.com/orgs/community/discussions/25702) the follow up workflow.
+          # - You can also use PAT token, however you will need to constantly manage the token rotations, which doesn't scale well.
+          # github-token: ${{ secrets.GITHUB_TOKEN }}
+
+          # you can also use custom auth gateway to get access token,
+          # if you want to install Kodelet app other than the [default app](https://github.com/apps/kodelet)
+          # auth-gateway-endpoint: https://example.com/api/github
