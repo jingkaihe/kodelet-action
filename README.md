@@ -3,16 +3,48 @@
 [![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/jingkaihe/kodelet-action)](https://github.com/jingkaihe/kodelet-action/releases)
 [![GitHub Marketplace](https://img.shields.io/badge/Marketplace-Kodelet%20Action-blue.svg?colorA=24292e&colorB=0366d6&style=flat&longCache=true&logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAOCAYAAAAfSC3RAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAM6wAADOsB5dZE0gAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAERSURBVCiRhZG/SsMxFEZPfsVJ61jbxaF0cRQRcRJ9hlYn30IHN/+9iquDCOIsblIrOjqKgy5aKoJQj4n3EllCLx9AuAkfOScdtNwJZdH+fKGiMEhiFCeAJ+JPWBa8AADBSOA8gNFSKYR8H6AAD5KM8HFw/YJJpJaUKJhANSRBQ1EY0rQr4dMZPKwZLLqA2k8y5nHEPW2hL9P4pYgHuNzQASi7/OcJwrHQlJ3I1hQh0Y6J2V0K04UHMcOKoIJSojM/JUKKyBwb8kRcnGPKJOSfDGpL1XYAAAAASUVORK5CYII=)](https://github.com/marketplace/actions/kodelet-action)
 
-A GitHub Action that automates software engineering tasks using Kodelet AI. This action enables background execution of Kodelet for issue resolution, pull request reviews, and code improvements triggered by GitHub events.
+Kodelet is an LLM-powered coding agent that integrates seamlessly with your GitHub workflow, transforming how you handle development tasks.
+
+
+
+## Table of Contents
+
+- [Features](#features)
+- [Quick Start](#quick-start)
+  - [1. Setup API Key](#1-setup-api-key)
+  - [2. Create Workflow File](#2-create-workflow-file)
+  - [3. Trigger Kodelet](#3-trigger-kodelet)
+- [Inputs](#inputs)
+- [Usage Examples](#usage-examples)
+  - [Basic Usage (Minimal Configuration)](#basic-usage-minimal-configuration)
+  - [Auth Gateway Authentication](#auth-gateway-authentication)
+  - [Custom Configuration](#custom-configuration)
+  - [Manual Override (if needed)](#manual-override-if-needed)
+  - [Environment Variables](#environment-variables)
+  - [Version Pinning](#version-pinning)
+  - [Kodelet Configuration](#kodelet-configuration)
+- [Permissions](#permissions)
+- [Security](#security)
+- [Supported Events](#supported-events)
+- [Error Handling](#error-handling)
+- [GitHub Authentication Token Considerations](#github-authentication-token-considerations)
+  - [1. Auth Gateway (Default & Recommended)](#1-auth-gateway-default--recommended)
+  - [2. Standard GitHub Token](#2-standard-github-token)
+  - [3. Personal Access Token (PAT)](#3-personal-access-token-pat)
+  - [4. Custom Auth Gateway](#custom-auth-gateway)
+  - [Recommendation](#recommendation)
+- [Versioning](#versioning)
+- [Development](#development)
+  - [Testing Locally](#testing-locally)
+  - [Contributing](#contributing)
+- [Support](#support)
+- [License](#license)
 
 ## Features
 
-* 🤖 **AI-Powered Engineering**: Automates software engineering tasks using advanced AI models
-* 📝 **Issue Resolution**: Automatically resolves GitHub issues with code changes and explanations
-* 🔍 **PR Reviews**: Provides intelligent code review comments and suggestions
-* ⚡ **Background Processing**: Runs asynchronously without blocking your development workflow
-* 🔄 **Multi-Event Support**: Works with issue comments, PR comments, and review comments
-* 🛡️ **Secure**: Uses GitHub tokens and API keys securely through GitHub Secrets
+* **Automated Issue Resolution** Kodelet analyzes your GitHub issues and automatically generates comprehensive solutions, creating pull requests with clean, production-ready code based on your specifications. It handles complex coding tasks without manual intervention, letting you focus on higher-level architectural decisions while it manages the implementation details.
+* **Intelligent Continuous Improvement** Kodelet doesn't just write code once and disappear. It iteratively improves pull requests based on your feedback and code review comments, adapting to your coding standards and project requirements.
+* **Parallel Task Management** Scale your development capacity by delegating multiple coding tasks simultaneously. You can assign as many issues as needed to Kodelet, and it will work on them in parallel, maximizing your development velocity without requiring you to manage the workload distribution.
 
 ## Quick Start
 
@@ -316,6 +348,123 @@ The action automatically handles errors and posts informative comments when exec
 
 Failed runs include links to workflow logs for debugging.
 
+## GitHub Authentication Token Considerations
+
+The action supports three different approaches for GitHub authentication, each with distinct advantages and limitations:
+
+### 1. Auth Gateway (Default & Recommended)
+
+**How it works**: Uses GitHub's OIDC ID tokens to authenticate with Kodelet's Auth Gateway, which provides an enhanced GitHub token.
+
+**Advantages**:
+- **Enhanced Triggers**: Code pushes and PR creation by Kodelet will trigger follow-up workflow runs
+- **Kodelet User Context**: Actions appear as performed by the `kodelet` user instead of `github-actions[bot]`
+- **No Token Management**: No need to create or rotate tokens manually
+- **Secure**: Uses GitHub's built-in OIDC authentication
+
+**Requirements**:
+- `id-token: write` permission in workflow
+- Repository must allow the Kodelet app (default: [kodelet app](https://github.com/apps/kodelet))
+
+**Usage**:
+```yaml
+permissions:
+  id-token: write        # Required for auth gateway
+  contents: write
+  issues: write
+  pull-requests: write
+
+steps:
+  - uses: jingkaihe/kodelet-action@v0.1.7-alpha
+    with:
+      anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+      # Auth gateway used automatically
+```
+
+### 2. Standard GitHub Token
+
+**How it works**: Uses the default `GITHUB_TOKEN` provided by GitHub Actions.
+
+**Advantages**:
+- **No Setup Required**: Available by default in all GitHub Actions
+- **No External Dependencies**: Doesn't require external services
+
+**Limitations**:
+- **Limited Triggers**: [Code pushes and PR creation won't trigger follow-up workflows](https://github.com/orgs/community/discussions/25702)
+- **Bot User Context**: Actions appear as performed by `github-actions[bot]`
+
+**Usage**:
+```yaml
+steps:
+  - uses: jingkaihe/kodelet-action@v0.1.7-alpha
+    with:
+      anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}  # Override auth gateway
+```
+
+### 3. Personal Access Token (PAT)
+
+**How it works**: Uses a manually created Personal Access Token with repository permissions.
+
+**Advantages**:
+- **Enhanced Triggers**: Code pushes and PR creation will trigger follow-up workflows
+- **User Context**: Actions appear as performed by the token owner
+
+**Limitations**:
+- **Token Management Overhead**: Requires manual creation, rotation, and renewal
+- **Security Risk**: Tokens need to be stored as secrets and managed carefully
+- **Doesn't Scale**: Difficult to manage across multiple repositories
+
+**Usage**:
+```yaml
+steps:
+  - uses: jingkaihe/kodelet-action@v0.1.7-alpha
+    with:
+      anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+      github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+```
+
+### 4. Custom Auth Gateway
+
+**How it works**: Uses a custom auth gateway endpoint instead of the default Kodelet service to obtain GitHub tokens.
+
+**When to use**:
+- **Enterprise Deployments**: Organizations running their own Kodelet instance with custom authentication requirements
+- **Security Compliance**: Companies with strict policies requiring all external services to go through internal gateways
+- **Custom GitHub Apps**: Organizations that have created their own GitHub App instead of using the public Kodelet app
+- **Air-Gapped Environments**: Deployments in restricted networks that cannot access external Kodelet services
+- **Custom Authentication Flows**: Organizations needing specialized token acquisition logic or additional security layers
+
+**Requirements**:
+- Custom auth gateway service compatible with Kodelet's authentication protocol
+- `id-token: write` permission for OIDC authentication
+- Custom GitHub App configured for your organization (if not using the default)
+
+**Usage**:
+```yaml
+steps:
+  - uses: jingkaihe/kodelet-action@v0.1.7-alpha
+    with:
+      anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
+      auth-gateway-endpoint: https://your-custom-gateway.com/api/github
+```
+
+**Considerations**:
+- Requires maintaining your own auth gateway infrastructure
+- Must implement the same authentication protocol as the default gateway
+- Need to ensure high availability and security of the custom service
+- May require additional setup and configuration compared to the default approach
+
+### Recommendation
+
+**For most users**: Use the default Auth Gateway approach as it provides the best balance of functionality, security, and ease of use.
+
+**For organizations with strict security policies**: Consider using a PAT with appropriate scope limitations, but be prepared for the additional token management overhead.
+
+**For simple, one-off usage**: The standard `GITHUB_TOKEN` may be sufficient if follow-up workflow triggers are not needed.
+
+**For enterprise deployments**: Consider using a custom auth gateway if you have strict security policies or need to integrate with your existing authentication infrastructure.
+
 ## Versioning
 
 This action follows semantic versioning:
@@ -347,9 +496,9 @@ act pull_request_review_comment --secret ANTHROPIC_API_KEY=your-key
 
 ## Support
 
-- 📖 [Kodelet Documentation](https://github.com/jingkaihe/kodelet)
-- 🐛 [Report Issues](https://github.com/jingkaihe/kodelet-action/issues)
-- 💬 [Discussions](https://github.com/jingkaihe/kodelet-action/discussions)
+- [Kodelet Documentation](https://github.com/jingkaihe/kodelet)
+- [Report Issues](https://github.com/jingkaihe/kodelet-action/issues)
+- [Discussions](https://github.com/jingkaihe/kodelet-action/discussions)
 
 ## License
 
