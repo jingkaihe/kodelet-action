@@ -42,9 +42,10 @@ Kodelet is an LLM-powered coding agent that integrates seamlessly with your GitH
 
 ## Features
 
-* **Automated Issue Resolution** Kodelet analyzes your GitHub issues and automatically generates comprehensive solutions, creating pull requests with clean, production-ready code based on your specifications. It handles complex coding tasks without manual intervention, letting you focus on higher-level architectural decisions while it manages the implementation details.
+* **Automated Issue Resolution** Kodelet analyses your GitHub issues and automatically generates comprehensive solutions, creating pull requests with clean, production-ready code based on your specifications. It handles complex coding tasks without manual intervention, letting you focus on higher-level architectural decisions while it manages the implementation details.
 * **Intelligent Continuous Improvement** Kodelet doesn't just write code once and disappear. It iteratively improves pull requests based on your feedback and code review comments, adapting to your coding standards and project requirements.
-* **Parallel Task Management** Scale your development capacity by delegating multiple coding tasks simultaneously. You can assign as many issues as needed to Kodelet, and it will work on them in parallel, maximizing your development velocity without requiring you to manage the workload distribution.
+* **Parallel Task Management** Scale your development capacity by delegating multiple coding tasks simultaneously. You can assign as many issues as needed to Kodelet, and it will work on them in parallel, maximising your development velocity without requiring you to manage the workload distribution.
+* **Integrate into your workflow** Simply mention `@kodelet` in any GitHub issue or pull request to engage your AI coding assistant. Kodelet will spring into github action, analysing your requirements and delivering high-quality solutions tailored to your project.
 
 ## Quick Start
 
