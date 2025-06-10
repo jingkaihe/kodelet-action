@@ -13,8 +13,12 @@ inputs:
     required: false
   github-token:
     description: 'GitHub token for repository operations'
-    required: true
-    default: ${{ github.token }}
+    required: false
+    default: ''
+  auth-gateway-endpoint:
+    description: 'Auth gateway endpoint URL to obtain GitHub token (defaults to https://gha-auth-gateway.kodelet.com/api/github)'
+    required: false
+    default: 'https://gha-auth-gateway.kodelet.com/api/github'
   commenter:
     description: 'Username of the person who triggered the action'
     required: false
@@ -74,10 +78,47 @@ inputs:
 runs:
   using: 'composite'
   steps:
+    - name: Authenticate and resolve GitHub token
+      uses: actions/github-script@v7
+      with:
+        script: |
+          if ('${{ inputs.github-token }}') {
+            console.log('Using provided GitHub token');
+            core.exportVariable('GITHUB_TOKEN', '${{ inputs.github-token }}');
+            return;
+          }
+
+          console.log('No GitHub token provided, using auth gateway endpoint');
+
+          const token = await core.getIDToken("kodelet-action");
+
+          const response = await fetch('${{ inputs.auth-gateway-endpoint }}', {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+
+          if (!response.ok) {
+            throw new Error(`Auth gateway request failed: ${response.status} ${response.statusText}`);
+          }
+
+          const data = await response.json();
+
+          // Get access token from response
+          const accessToken = data.access_token;
+
+          if (!accessToken) {
+            throw new Error('No access token received from auth gateway');
+          }
+
+          core.setSecret(accessToken);
+          core.exportVariable('GITHUB_TOKEN', accessToken);
+
     - name: Post status comment
       uses: actions/github-script@v7
       with:
-        github-token: ${{ inputs.github-token }}
+        github-token: ${{ env.GITHUB_TOKEN }}
         script: |
           // Determine the correct issue/PR number and type
           const issueNumber = parseInt('${{ inputs.issue-number }}');
@@ -104,7 +145,6 @@ runs:
     - name: Configure Git
       shell: bash
       env:
-        GITHUB_TOKEN: ${{ inputs.github-token }}
         COMMENTER: ${{ inputs.commenter }}
       run: |
         # Try to get the user's public email first
@@ -129,9 +169,16 @@ runs:
       env:
         ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
         OPENAI_API_KEY: ${{ inputs.openai-api-key }}
-        GITHUB_TOKEN: ${{ inputs.github-token }}
         KODELET_LOG_LEVEL: ${{ inputs.log-level }}
+        GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
       run: |
+        # reset the remote url so that the token is used
+        git remote set-url origin https://kodelet:$GITHUB_TOKEN@github.com/${{ inputs.repository }}
+        # tidy up the git config added by the checkout action
+        git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+        git config --local --unset-all http.https://github.com/.extraheader
+        git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+
         # Set timeout for command execution
         timeout_minutes="${{ inputs.timeout-minutes }}"
         timeout_seconds=$((timeout_minutes * 60))
@@ -182,7 +229,7 @@ runs:
       uses: actions/github-script@v7
       if: failure()
       with:
-        github-token: ${{ inputs.github-token }}
+        github-token: ${{ env.GITHUB_TOKEN }}
         script: |
           const issueNumber = parseInt('${{ inputs.issue-number }}');
           const isPR = '${{ inputs.is-pr }}' === 'true';
