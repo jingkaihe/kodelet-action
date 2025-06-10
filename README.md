@@ -5,8 +5,6 @@
 
 Kodelet is an LLM-powered coding agent that integrates seamlessly with your GitHub workflow, transforming how you handle development tasks.
 
-
-
 ## Table of Contents
 
 - [Features](#features)
@@ -14,6 +12,7 @@ Kodelet is an LLM-powered coding agent that integrates seamlessly with your GitH
   - [1. Setup API Key](#1-setup-api-key)
   - [2. Create Workflow File](#2-create-workflow-file)
   - [3. Trigger Kodelet](#3-trigger-kodelet)
+- [How It Works](#how-it-works)
 - [Inputs](#inputs)
 - [Usage Examples](#usage-examples)
   - [Basic Usage (Minimal Configuration)](#basic-usage-minimal-configuration)
@@ -119,6 +118,58 @@ Comment `@kodelet` on any issue or pull request to trigger automated assistance:
 - **Issues**: `@kodelet please fix this bug`
 - **PRs**: `@kodelet review this code`
 - **PR Reviews**: Include `@kodelet` in review comments
+
+## How It Works
+
+```mermaid
+flowchart LR
+    A[User mentions @kodelet] --> B{Event Type}
+
+    B -->|issues.opened| C1[Issue Created]
+    B -->|issue_comment| C2[Issue Comment]
+    B -->|issue_comment on PR| C3[PR Comment]
+    B -->|pull_request_review_comment| C4[PR Review Comment]
+
+    C1 --> D[Check Permissions]
+    C2 --> D
+    C3 --> D
+    C4 --> D
+
+    D --> E{User has OWNER/MEMBER/COLLABORATOR access?}
+    E -->|No| F[Action Skipped]
+    E -->|Yes| G[Start Kodelet Action]
+
+    G --> H{GitHub Token Provided?}
+    H -->|Yes| I[Use Provided Token]
+    H -->|No| J[Auth Gateway OIDC]
+
+    I --> K[Post Status Comment]
+    J --> K
+
+    K --> L[Install Kodelet CLI]
+    L --> M[Configure Git]
+    M --> N[Parse Event Context]
+
+    N --> O{Route Command}
+    O -->|Issue| P[kodelet issue-resolve]
+    O -->|PR Comment| Q[kodelet pr-respond --issue-comment-id]
+    O -->|PR Review| R[kodelet pr-respond --review-id]
+
+    P --> S[Execute Kodelet]
+    Q --> S
+    R --> S
+
+    S --> T{Success?}
+    T -->|Yes| U[✅ Task Complete]
+    T -->|No| V[❌ Post Error Comment]
+
+    style A fill:#e3f2fd
+    style G fill:#f3e5f5
+    style S fill:#e8f5e8
+    style U fill:#c8e6c8
+    style V fill:#ffcdd2
+    style F fill:#f5f5f5
+```
 
 ## Inputs
 
