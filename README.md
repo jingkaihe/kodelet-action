@@ -105,7 +105,7 @@ jobs:
         run: |
           echo "YMMV"
       - name: Run Kodelet
-        uses: jingkaihe/kodelet-action@v0.1.7-alpha
+        uses: jingkaihe/kodelet-action@v0.1.8-alpha
         with:
           anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
           # All other inputs are automatically populated from GitHub context
@@ -200,13 +200,13 @@ flowchart LR
 
 ```yaml
 # With Anthropic API
-- uses: jingkaihe/kodelet-action@v0.1.7-alpha
+- uses: jingkaihe/kodelet-action@v0.1.8-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # All other inputs are automatically populated from GitHub context
 
 # With OpenAI API
-- uses: jingkaihe/kodelet-action@v0.1.7-alpha
+- uses: jingkaihe/kodelet-action@v0.1.8-alpha
   with:
     openai-api-key: ${{ secrets.OPENAI_API_KEY }}
     # All other inputs are automatically populated from GitHub context
@@ -222,7 +222,7 @@ By default, the action uses the Auth Gateway to obtain a GitHub token instead of
 The action automatically handles authentication via the auth gateway. To use a custom GitHub token instead:
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.7-alpha
+- uses: jingkaihe/kodelet-action@v0.1.8-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     github-token: ${{ secrets.CUSTOM_GITHUB_TOKEN }}  # Override auth gateway
@@ -241,7 +241,7 @@ permissions:
 ### Custom Configuration
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.7-alpha
+- uses: jingkaihe/kodelet-action@v0.1.8-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     timeout-minutes: 180  # 3 hours
@@ -253,7 +253,7 @@ permissions:
 ### Manual Override (if needed)
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.7-alpha
+- uses: jingkaihe/kodelet-action@v0.1.8-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # Override any auto-detected values if needed:
@@ -269,7 +269,7 @@ permissions:
 You can pass additional environment variables to Kodelet:
 
 ```yaml
-- uses: jingkaihe/kodelet-action@v0.1.7-alpha
+- uses: jingkaihe/kodelet-action@v0.1.8-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     env: |
@@ -288,12 +288,12 @@ You can control which version of Kodelet is installed:
 
 ```yaml
 # Use latest release (default)
-- uses: jingkaihe/kodelet-action@v0.1.7-alpha
+- uses: jingkaihe/kodelet-action@v0.1.8-alpha
   with:
     kodelet-version: latest
 
 # Pin to specific version
-- uses: jingkaihe/kodelet-action@v0.1.7-alpha
+- uses: jingkaihe/kodelet-action@v0.1.8-alpha
   with:
     kodelet-version: 0.0.35.alpha
 ```
@@ -309,7 +309,7 @@ The action supports configurable Kodelet settings through YAML configuration con
 
 ```yaml
 # Use custom configuration content
-- uses: jingkaihe/kodelet-action@v0.1.7-alpha
+- uses: jingkaihe/kodelet-action@v0.1.8-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     kodelet-config: |
@@ -333,7 +333,7 @@ The action supports configurable Kodelet settings through YAML configuration con
         ratio: 1
 
 # OpenAI Configuration Example
-- uses: jingkaihe/kodelet-action@v0.1.7-alpha
+- uses: jingkaihe/kodelet-action@v0.1.8-alpha
   with:
     openai-api-key: ${{ secrets.OPENAI_API_KEY }}
     kodelet-config: |
@@ -350,7 +350,7 @@ The action supports configurable Kodelet settings through YAML configuration con
       log_format: "json"
 
 # Use default configuration file (./kodelet-config.yaml) if it exists
-- uses: jingkaihe/kodelet-action@v0.1.7-alpha
+- uses: jingkaihe/kodelet-action@v0.1.8-alpha
   with:
     anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
     # Will automatically use ./kodelet-config.yaml if present
@@ -427,7 +427,7 @@ permissions:
   pull-requests: write
 
 steps:
-  - uses: jingkaihe/kodelet-action@v0.1.7-alpha
+  - uses: jingkaihe/kodelet-action@v0.1.8-alpha
     with:
       anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
       # Auth gateway used automatically
@@ -448,7 +448,7 @@ steps:
 **Usage**:
 ```yaml
 steps:
-  - uses: jingkaihe/kodelet-action@v0.1.7-alpha
+  - uses: jingkaihe/kodelet-action@v0.1.8-alpha
     with:
       anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
       github-token: ${{ secrets.GITHUB_TOKEN }}  # Override auth gateway
@@ -470,7 +470,7 @@ steps:
 **Usage**:
 ```yaml
 steps:
-  - uses: jingkaihe/kodelet-action@v0.1.7-alpha
+  - uses: jingkaihe/kodelet-action@v0.1.8-alpha
     with:
       anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
       github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -495,7 +495,7 @@ steps:
 **Usage**:
 ```yaml
 steps:
-  - uses: jingkaihe/kodelet-action@v0.1.7-alpha
+  - uses: jingkaihe/kodelet-action@v0.1.8-alpha
     with:
       anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}
       auth-gateway-endpoint: https://your-custom-gateway.com/api/github
@@ -522,7 +522,7 @@ steps:
 This action follows semantic versioning:
 
 - **Latest stable**: `@v0`
-- **Specific version**: `@v0.1.7-alpha`
+- **Specific version**: `@v0.1.8-alpha`
 - **Development**: `@main` (not recommended for production)
 
 ## Development
