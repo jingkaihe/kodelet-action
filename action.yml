@@ -172,8 +172,8 @@ runs:
         KODELET_LOG_LEVEL: ${{ inputs.log-level }}
         GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
       run: |
-        # Add ~/.kodelet/bin to PATH
-        export PATH="$HOME/.kodelet/bin:$PATH"
+        # Add ~/.local/bin to PATH
+        export PATH="$HOME/.local/bin:$PATH"
 
         # reset the remote url so that the token is used
         git remote set-url origin https://kodelet:$GITHUB_TOKEN@github.com/${{ inputs.repository }}
@@ -253,3 +253,4 @@ runs:
 
           You may want to try again later or handle this manually.`
           });
+
